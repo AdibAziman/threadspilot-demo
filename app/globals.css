@@ -1,0 +1,326 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,400..800;1,14..32,400..600&family=Playfair+Display:ital,wght@1,400..700&display=swap");
+@import "tailwindcss";
+
+/* ThreadsPilot design tokens — generated from design-system/threadspilot/MASTER.md
+   Palette is authoritative from MASTER; only the font pairing was adjusted (see note at bottom). */
+:root {
+  --font-inter: "Inter";
+  --font-playfair: "Playfair Display";
+  --primary: #e11d48;
+  --on-primary: #ffffff;
+  --secondary: #fb7185;
+  --on-secondary: #0f172a;
+  --accent: #2563eb;
+  --on-accent: #ffffff;
+  --background: #fff1f2;
+  --foreground: #881337;
+  --card: #ffffff;
+  --card-foreground: #881337;
+  --muted: #f0ecf2;
+  --muted-foreground: #475569;
+  --border: #fecdd3;
+  --destructive: #dc2626;
+  --on-destructive: #ffffff;
+  --ring: #e11d48;
+  --success: #047857;
+  --warn: #b45309;
+  --info: #2563eb;
+
+  --space-xs: 2px;
+  --space-sm: 4px;
+  --space-md: 8px;
+  --space-lg: 12px;
+  --space-xl: 16px;
+  --space-2xl: 24px;
+  --space-3xl: 32px;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.15);
+  --radius: 12px;
+}
+
+[data-theme="dark"] {
+  --primary: #fb7185;
+  --on-primary: #40030f;
+  --secondary: #9f1239;
+  --on-secondary: #ffe4e6;
+  --accent: #60a5fa;
+  --on-accent: #0b1120;
+  --background: #170e12;
+  --foreground: #ffe4e6;
+  --card: #221519;
+  --card-foreground: #ffe4e6;
+  --muted: #2b1c21;
+  --muted-foreground: #d4b8be;
+  --border: #45242c;
+  --destructive: #f87171;
+  --on-destructive: #450a0a;
+  --ring: #fb7185;
+  --success: #34d399;
+  --warn: #fbbf24;
+  --info: #60a5fa;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.5);
+  --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.55);
+}
+
+@theme inline {
+  --color-primary: var(--primary);
+  --color-on-primary: var(--on-primary);
+  --color-secondary: var(--secondary);
+  --color-on-secondary: var(--on-secondary);
+  --color-accent: var(--accent);
+  --color-on-accent: var(--on-accent);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-on-destructive: var(--on-destructive);
+  --color-ring: var(--ring);
+  --color-success: var(--success);
+  --color-warn: var(--warn);
+  --color-info: var(--info);
+
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-playfair), Georgia, serif;
+  --font-mono: ui-monospace, "SFMono-Regular", Menlo, monospace;
+
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --shadow-card: var(--shadow-md);
+}
+
+* {
+  border-color: var(--border);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+::selection {
+  background: var(--primary);
+  color: var(--on-primary);
+}
+
+/* Thin scrollbars on dense dashboard panels */
+.scroll-thin {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+.scroll-thin::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.scroll-thin::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 99px;
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 200ms ease, border-color 200ms ease;
+}
+
+.card-interactive:hover {
+  box-shadow: var(--shadow-md);
+  border-color: var(--secondary);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-md);
+  min-height: 44px;
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 200ms ease, color 200ms ease, border-color 200ms ease,
+    box-shadow 200ms ease;
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.btn-primary {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+.btn-primary:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+.btn-brand {
+  background: var(--primary);
+  color: var(--on-primary);
+}
+.btn-brand:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+.btn-outline {
+  background: transparent;
+  color: var(--primary);
+  border-color: var(--primary);
+}
+.btn-outline:hover:not(:disabled) {
+  background: var(--primary);
+  color: var(--on-primary);
+}
+.btn-ghost {
+  background: transparent;
+  color: var(--foreground);
+}
+.btn-ghost:hover:not(:disabled) {
+  background: var(--muted);
+}
+.btn-sm {
+  min-height: 34px;
+  padding: 6px 12px;
+  font-size: 13px;
+  border-radius: 8px;
+}
+.btn-icon {
+  min-height: 44px;
+  width: 44px;
+  padding: 0;
+}
+
+.input,
+.textarea,
+.select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  font-size: 15px;
+  background: var(--card);
+  color: var(--card-foreground);
+  transition: border-color 200ms ease, box-shadow 200ms ease;
+  min-height: 44px;
+}
+.input::placeholder,
+.textarea::placeholder {
+  color: var(--muted-foreground);
+}
+.input:focus,
+.textarea:focus,
+.select:focus {
+  border-color: var(--primary);
+  outline: none;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 18%, transparent);
+}
+.textarea {
+  resize: vertical;
+  line-height: 1.55;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.6;
+  white-space: nowrap;
+  border: 1px solid transparent;
+}
+
+.skeleton {
+  background: linear-gradient(90deg, var(--muted) 25%, var(--border) 37%, var(--muted) 63%);
+  background-size: 400% 100%;
+  animation: shimmer 1.4s ease infinite;
+}
+@keyframes shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: 0 0;
+  }
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.stagger > * {
+  animation: fadeUp 340ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.stagger > *:nth-child(1) { animation-delay: 0ms; }
+.stagger > *:nth-child(2) { animation-delay: 45ms; }
+.stagger > *:nth-child(3) { animation-delay: 90ms; }
+.stagger > *:nth-child(4) { animation-delay: 135ms; }
+.stagger > *:nth-child(5) { animation-delay: 180ms; }
+.stagger > *:nth-child(6) { animation-delay: 225ms; }
+.stagger > *:nth-child(7) { animation-delay: 270ms; }
+.stagger > *:nth-child(8) { animation-delay: 315ms; }
+.stagger > *:nth-child(9) { animation-delay: 360ms; }
+.stagger > *:nth-child(10) { animation-delay: 405ms; }
+
+@keyframes pulseDot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+.pulse-dot {
+  animation: pulseDot 1.8s ease-in-out infinite;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: none; }
+}
+.pop {
+  animation: slideDown 180ms ease both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Font note: MASTER.md pairs Playfair Display as body font. A serif body face hurts
+   scannability in a dense dashboard, so Inter carries UI text and headings, while
+   Playfair Display italic is reserved for editorial accents (landing hero, numbers). */
