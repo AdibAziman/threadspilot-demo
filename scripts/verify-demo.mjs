@@ -87,7 +87,37 @@ for (const route of ROUTES) {
 
 // interaction check: scheduling from the composer puts the post in the queue
 await page.goto(`${BASE}/app/composer`, { waitUntil: "networkidle2" });
-await page.type("#post-text", "Smoke test post. Safe to delete.");
+// wait for hydration: the store sets data-theme on mount, and typing before React
+// attaches means onChange never fires and the state stays empty (slow CDN hosts).
+await page.waitForFunction(() => !!document.documentElement.dataset.theme, { timeout: 20000 });
+await page.bringToFront();
+await page.click("#post-text");
+await page.keyboard.type("Smoke test post. Safe to delete.");
+let typedVia = "keyboard";
+if (!(await page.evaluate(() => document.getElementById("post-text")?.value ?? "")).includes("Smoke")) {
+  // Headless Chrome sometimes drops synthetic keystrokes when the window has no OS focus.
+  // Drive the same DOM path React listens to instead, and report which route was used.
+  typedVia = "input-event";
+  await page.evaluate(() => {
+    const el = document.getElementById("post-text");
+    const setter = Object.getOwnPropertyDescriptor(
+      window.HTMLTextAreaElement.prototype,
+      "value"
+    ).set;
+    setter.call(el, "Smoke test post. Safe to delete.");
+    el.dispatchEvent(new Event("input", { bubbles: true }));
+  });
+}
+// prove React received the input before clicking
+let typed = true;
+try {
+  await page.waitForFunction(
+    () => /^32 \/ 500/.test(document.getElementById("char-counter")?.textContent?.trim() ?? ""),
+    { timeout: 8000 }
+  );
+} catch {
+  typed = false;
+}
 const clicked = await page.evaluate(() => {
   const btn = [...document.querySelectorAll("button")].find((b) =>
     b.textContent?.includes("Schedule post")
@@ -110,14 +140,17 @@ await page.goto(`${BASE}/app/queue`, { waitUntil: "networkidle2" });
 const scheduled = await page.evaluate(() => document.body.innerText.includes("Smoke test post"));
 results.push({
   path: "composer -> queue",
-  hydrated: clicked && persisted && scheduled,
+  hydrated: clicked && typed && persisted && scheduled,
+  note: `input via ${typedVia}`,
   missing: !clicked
     ? ["schedule button not found"]
-    : !persisted
-      ? ["post never persisted to store"]
-      : scheduled
-        ? []
-        : ["post not found in queue"],
+    : !typed
+      ? ["textarea input never reached React state"]
+      : !persisted
+        ? ["post never persisted to store"]
+        : scheduled
+          ? []
+          : ["post not found in queue"],
 });
 
 // toggle dark mode + drag-free reschedule surface
