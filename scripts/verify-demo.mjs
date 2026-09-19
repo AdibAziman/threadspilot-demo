@@ -48,7 +48,7 @@ const results = [];
 await page.setViewport({ width: 1440, height: 900 });
 await page.goto(`${BASE}/login`, { waitUntil: "networkidle2" });
 await page.$eval("form", (f) => f.requestSubmit());
-await page.waitForFunction(() => location.pathname.startsWith("/app"), { timeout: 20000 });
+await page.waitForFunction(() => location.pathname.includes("/app"), { timeout: 20000 });
 await page.waitForFunction(() => document.body.innerText.includes("Next in queue"), {
   timeout: 20000,
 });
@@ -95,13 +95,29 @@ const clicked = await page.evaluate(() => {
   btn?.click();
   return !!btn;
 });
-await new Promise((r) => setTimeout(r, 900));
+await new Promise((r) => setTimeout(r, 400));
+// the store persists on a React effect — wait for the write, don't guess with a sleep
+let persisted = true;
+try {
+  await page.waitForFunction(
+    () => (localStorage.getItem("threadspilot.demo.v1") ?? "").includes("Smoke test post"),
+    { timeout: 15000 }
+  );
+} catch {
+  persisted = false;
+}
 await page.goto(`${BASE}/app/queue`, { waitUntil: "networkidle2" });
 const scheduled = await page.evaluate(() => document.body.innerText.includes("Smoke test post"));
 results.push({
   path: "composer -> queue",
-  hydrated: clicked && scheduled,
-  missing: clicked ? (scheduled ? [] : ["post not found in queue"]) : ["schedule button not found"],
+  hydrated: clicked && persisted && scheduled,
+  missing: !clicked
+    ? ["schedule button not found"]
+    : !persisted
+      ? ["post never persisted to store"]
+      : scheduled
+        ? []
+        : ["post not found in queue"],
 });
 
 // toggle dark mode + drag-free reschedule surface
