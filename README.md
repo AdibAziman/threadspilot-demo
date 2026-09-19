@@ -1,6 +1,7 @@
 # ThreadsPilot — product demo
 
-**Live demo: https://threadspilot-demo.vercel.app**
+**Live demo: https://adibaziman.github.io/threadspilot-demo/** (GitHub Pages)
+Mirror: https://threadspilot-demo.vercel.app
 Repo: https://github.com/AdibAziman/threadspilot-demo
 
 Interactive showcase of a Threads scheduling workspace. **All data is fake and lives in your
