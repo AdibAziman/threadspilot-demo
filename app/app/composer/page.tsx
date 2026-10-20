@@ -22,7 +22,7 @@ import {
 import { Button, Card, Chip, Field, SectionHeader, Tabs } from "@/components/ui";
 import { PostPreview } from "@/components/post-preview";
 import { useStore } from "@/lib/store";
-import { charBudget, localInputValue, nextDateAtTime, uid } from "@/lib/utils";
+import { charBudget, localInputValue, nextDateAtTime, parseLocalInput, uid } from "@/lib/utils";
 import type { Post } from "@/lib/types";
 
 export default function ComposerPage() {
@@ -46,11 +46,17 @@ export default function ComposerPage() {
   const budget = charBudget(text);
   const activeSlot = slots.find((s) => s.id === slotId);
 
+  const customTime = useMemo(() => parseLocalInput(when), [when]);
+  // A cleared datetime-local field yields "" -> Invalid Date -> toISOString() throws
+  // during render, which takes the whole page down. Keep the resolved time always
+  // valid and surface the empty field as a validation error instead.
+  const customInvalid = timing === "custom" && !customTime;
+
   const resolvedTime = useMemo(() => {
     if (timing === "slot" && activeSlot) return nextDateAtTime(activeSlot.time, activeSlot.days).toISOString();
     if (timing === "next") return new Date(Date.now() + 15 * 60000).toISOString();
-    return new Date(when).toISOString();
-  }, [timing, activeSlot, when]);
+    return (customTime ?? new Date(Date.now() + 15 * 60000)).toISOString();
+  }, [timing, activeSlot, customTime]);
 
   function buildPost(status: Post["status"]): Post {
     return {
@@ -77,6 +83,10 @@ export default function ComposerPage() {
     }
     if (budget.over) {
       toast({ title: "Over the limit", body: "Threads caps a post at 500 characters.", tone: "error" });
+      return;
+    }
+    if (customInvalid) {
+      toast({ title: "Pick a date and time", body: "The publish date is empty.", tone: "warn" });
       return;
     }
     savePost(buildPost(status));
@@ -388,11 +398,16 @@ export default function ComposerPage() {
             )}
 
             {timing === "custom" && (
-              <Field label="Publish at" hint="Times are shown in Asia/Kuala_Lumpur.">
+              <Field
+                label="Publish at"
+                hint="Times are shown in Asia/Kuala_Lumpur."
+                error={customInvalid ? "Pick a date and time." : undefined}
+              >
                 <input
                   type="datetime-local"
                   className="input"
                   value={when}
+                  aria-invalid={customInvalid || undefined}
                   onChange={(e) => setWhen(e.target.value)}
                 />
               </Field>
@@ -406,19 +421,25 @@ export default function ComposerPage() {
 
             <div className="flex flex-wrap items-center gap-2 rounded-xl bg-muted p-3 text-[12.5px]">
               <CalendarClock className="size-4 shrink-0 text-[var(--primary)]" aria-hidden />
-              <span>
-                Publishes{" "}
-                <strong>
-                  {new Date(resolvedTime).toLocaleString("en-GB", {
-                    weekday: "short",
-                    day: "numeric",
-                    month: "short",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                    timeZone: "Asia/Kuala_Lumpur",
-                  })}
-                </strong>
-              </span>
+              {customInvalid ? (
+                <span className="font-semibold text-[var(--destructive)]">
+                  Pick a date and time to publish
+                </span>
+              ) : (
+                <span>
+                  Publishes{" "}
+                  <strong>
+                    {new Date(resolvedTime).toLocaleString("en-GB", {
+                      weekday: "short",
+                      day: "numeric",
+                      month: "short",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      timeZone: "Asia/Kuala_Lumpur",
+                    })}
+                  </strong>
+                </span>
+              )}
               <Chip className="ml-auto" tone="accent">
                 {timing === "slot" ? activeSlot?.label ?? "Slot" : timing === "next" ? "Queue next" : "Custom"}
               </Chip>

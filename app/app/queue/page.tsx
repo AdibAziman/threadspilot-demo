@@ -16,7 +16,7 @@ import {
 import { Button, Card, Chip, Field, Modal, SectionHeader, StatusPill, Tabs } from "@/components/ui";
 import { PostPreview } from "@/components/post-preview";
 import { useStore } from "@/lib/store";
-import { countdown, fmtDateTime, localInputValue } from "@/lib/utils";
+import { countdown, fmtDateTime, localInputValue, parseLocalInput } from "@/lib/utils";
 import type { Post } from "@/lib/types";
 
 const FILTERS = [
@@ -49,6 +49,7 @@ export default function QueuePage() {
   const [editing, setEditing] = useState<Post | null>(null);
   const [rescheduling, setRescheduling] = useState<Post | null>(null);
   const [when, setWhen] = useState("");
+  const whenInvalid = !parseLocalInput(when);
 
   const counts = useMemo(
     () =>
@@ -452,7 +453,12 @@ export default function QueuePage() {
             <Button
               variant="brand"
               onClick={() => {
-                if (rescheduling) reschedule(rescheduling.id, new Date(when).toISOString());
+                const next = parseLocalInput(when);
+                if (!next) {
+                  toast({ title: "Pick a date and time", tone: "warn" });
+                  return;
+                }
+                if (rescheduling) reschedule(rescheduling.id, next.toISOString());
                 setRescheduling(null);
               }}
             >
@@ -461,8 +467,18 @@ export default function QueuePage() {
           </>
         }
       >
-        <Field label="New publish time" hint="Timezone: Asia/Kuala_Lumpur">
-          <input type="datetime-local" className="input" value={when} onChange={(e) => setWhen(e.target.value)} />
+        <Field
+          label="New publish time"
+          hint="Timezone: Asia/Kuala_Lumpur"
+          error={whenInvalid ? "Pick a date and time." : undefined}
+        >
+          <input
+            type="datetime-local"
+            className="input"
+            value={when}
+            aria-invalid={whenInvalid || undefined}
+            onChange={(e) => setWhen(e.target.value)}
+          />
         </Field>
       </Modal>
     </div>

@@ -66,6 +66,19 @@ export function localInputValue(date: Date) {
   )}:${pad(date.getMinutes())}`;
 }
 
+/**
+ * Parse a datetime-local input value.
+ *
+ * The browser hands back "" when the field is cleared, and "" parses to an
+ * Invalid Date whose toISOString() throws, so every scheduling input has to go
+ * through here before it touches a Date.
+ */
+export function parseLocalInput(value: string): Date | null {
+  if (!value) return null;
+  const d = new Date(value);
+  return Number.isNaN(d.getTime()) ? null : d;
+}
+
 export function nextDateAtTime(time: string, days: number[]) {
   const [h, m] = time.split(":").map(Number);
   const now = new Date();
