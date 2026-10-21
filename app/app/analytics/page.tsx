@@ -61,6 +61,7 @@ export default function AnalyticsPage() {
   return (
     <div className="flex flex-col gap-5">
       <SectionHeader
+        level={1}
         title="Analytics"
         subtitle={`Threads account ${connection.handle} · rolling ${range} days`}
         right={

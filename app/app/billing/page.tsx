@@ -57,6 +57,7 @@ export default function BillingPage() {
   return (
     <div className="flex flex-col gap-5">
       <SectionHeader
+        level={1}
         title="Plan & billing"
         subtitle="Demo workspace — no payment method is attached and nothing is charged"
         right={<Chip tone="brand">Current plan · {current}</Chip>}

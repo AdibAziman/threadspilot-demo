@@ -28,6 +28,7 @@ export default function TeamPage() {
   return (
     <div className="flex flex-col gap-5">
       <SectionHeader
+        level={1}
         title="Team"
         subtitle="Who can draft, who can approve, and who can only look"
         right={

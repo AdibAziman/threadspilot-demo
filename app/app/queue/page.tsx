@@ -73,6 +73,7 @@ export default function QueuePage() {
   return (
     <div className="flex flex-col gap-5">
       <SectionHeader
+        level={1}
         title="Queue"
         subtitle={`${counts.scheduled + counts.queued} waiting · ${connection.postQuotaTotal - connection.postQuotaUsed} publish slots left today`}
         right={

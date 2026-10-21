@@ -124,6 +124,7 @@ export default function ComposerPage() {
   return (
     <div className="flex flex-col gap-5">
       <SectionHeader
+        level={1}
         title="Composer"
         subtitle="Write it here, see it in a Threads frame, then park it in a slot"
         right={

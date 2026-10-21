@@ -48,6 +48,7 @@ export default function AutomationPage() {
   return (
     <div className="flex flex-col gap-5">
       <SectionHeader
+        level={1}
         title="Automation"
         subtitle="Engagement rules that run inside your guardrails, never outside them"
         right={

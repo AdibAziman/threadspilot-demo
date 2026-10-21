@@ -64,6 +64,7 @@ export default function InboxPage() {
   return (
     <div className="flex flex-col gap-5">
       <SectionHeader
+        level={1}
         title="Inbox"
         subtitle="Replies, mentions and questions from your posts"
         right={

@@ -46,6 +46,7 @@ export default function ConnectionsPage() {
   return (
     <div className="flex flex-col gap-5">
       <SectionHeader
+        level={1}
         title="Connections"
         subtitle="One OAuth handshake per account. Tokens are encrypted at rest and refreshed before expiry."
         right={

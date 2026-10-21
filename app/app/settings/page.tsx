@@ -30,6 +30,7 @@ export default function SettingsPage() {
   return (
     <div className="flex flex-col gap-5">
       <SectionHeader
+        level={1}
         title="Settings"
         subtitle="Workspace, notifications and guardrails"
         right={<Chip tone="accent">Demo · changes stay in your browser</Chip>}

@@ -21,22 +21,58 @@ export function Card({
   );
 }
 
+/**
+ * `level` picks which heading this is in the document, not how important it
+ * looks in isolation. 1 is the screen's own title (one per route), 2 is a
+ * section inside it. Every screen used to open with a level 2, so eleven of the
+ * twelve workspace routes shipped with no h1 at all and a screen reader had no
+ * top-level heading to orient on. A level 1 also carries the dashboard's
+ * page-title type scale, which the header never had: the screen name and an
+ * in-card section name were both 17px bold, so the page had no visual apex.
+ */
 export function SectionHeader({
   title,
   subtitle,
   right,
   className,
+  level = 2,
 }: {
   title: string;
   subtitle?: string;
   right?: React.ReactNode;
   className?: string;
+  level?: 1 | 2;
 }) {
+  const Title = level === 1 ? "h1" : "h2";
   return (
-    <div className={cn("flex flex-wrap items-start justify-between gap-3", className)}>
+    <div
+      className={cn(
+        "flex flex-wrap justify-between gap-3",
+        level === 1 ? "items-end" : "items-start",
+        className
+      )}
+    >
       <div className="min-w-0">
-        <h2 className="text-[17px] font-bold tracking-tight">{title}</h2>
-        {subtitle && <p className="text-[13px] text-muted-foreground mt-0.5">{subtitle}</p>}
+        <Title
+          className={
+            level === 1
+              ? "text-[24px] font-extrabold tracking-tight"
+              : "text-[17px] font-bold tracking-tight"
+          }
+        >
+          {title}
+        </Title>
+        {subtitle && (
+          <p
+            className={
+              level === 1
+                ? "text-[13.5px] text-muted-foreground mt-1"
+                : "text-[13px] text-muted-foreground mt-0.5"
+            }
+          >
+            {subtitle}
+          </p>
+        )}
       </div>
       {right && <div className="flex min-w-0 flex-wrap items-center gap-2">{right}</div>}
     </div>

@@ -30,6 +30,7 @@ export default function VoicePage() {
   return (
     <div className="flex flex-col gap-5">
       <SectionHeader
+        level={1}
         title="Brand voice"
         subtitle="What the AI is allowed to sound like on your account"
         right={
