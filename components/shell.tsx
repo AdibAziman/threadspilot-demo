@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   BarChart3,
   Bell,
@@ -57,6 +57,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const [palette, setPalette] = useState(false);
   const [query, setQuery] = useState("");
   const [cursor, setCursor] = useState(0);
+  const [accountMenu, setAccountMenu] = useState(false);
+  const accountMenuRef = useRef<HTMLDivElement>(null);
+  const accountTriggerRef = useRef<HTMLButtonElement>(null);
 
   useRouteChangeFocus();
 
@@ -74,7 +77,36 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   });
   const paletteRef = useDialogFocus(palette, closePalette, { initialFocus: "#palette-search" });
 
-  useEffect(() => setDrawer(false), [pathname]);
+  useEffect(() => {
+    setDrawer(false);
+    setAccountMenu(false);
+  }, [pathname]);
+
+  /**
+   * The account menu is a small non-modal disclosure, so it should close the
+   * way a disclosure does: Escape, or a click anywhere outside it - not only a
+   * second click on the avatar. It also must not survive a route change, since
+   * its own links navigate and a popover left hanging over the next screen
+   * covers content the user is trying to read.
+   */
+  useEffect(() => {
+    if (!accountMenu) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      e.stopPropagation();
+      setAccountMenu(false);
+      accountTriggerRef.current?.focus();
+    };
+    const onPointerDown = (e: PointerEvent) => {
+      if (!accountMenuRef.current?.contains(e.target as Node)) setAccountMenu(false);
+    };
+    document.addEventListener("keydown", onKey, true);
+    document.addEventListener("pointerdown", onPointerDown, true);
+    return () => {
+      document.removeEventListener("keydown", onKey, true);
+      document.removeEventListener("pointerdown", onPointerDown, true);
+    };
+  }, [accountMenu]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -231,20 +263,32 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                     <span className="absolute right-2 top-2 size-2 rounded-full bg-[var(--primary)]" />
                   )}
                 </Link>
-                <div className="relative">
-                  <details className="group">
-                    <summary className="flex cursor-pointer list-none items-center gap-2 rounded-lg px-1 py-1 transition-colors duration-200 hover:bg-muted">
-                      <Avatar name={user?.name ?? "Demo"} hue={user?.avatarHue ?? 344} size={32} />
-                      <span className="hidden text-left sm:block">
-                        <span className="block text-[12.5px] font-semibold leading-tight">
-                          {user?.name ?? "Demo user"}
-                        </span>
-                        <span className="block text-[11px] leading-tight text-muted-foreground">
-                          {user?.plan ?? "Growth"} plan
-                        </span>
+                <div className="relative" ref={accountMenuRef}>
+                  <button
+                    ref={accountTriggerRef}
+                    onClick={() => setAccountMenu((open) => !open)}
+                    aria-expanded={accountMenu}
+                    aria-controls={accountMenu ? "account-menu" : undefined}
+                    aria-label={`Account menu, ${user?.name ?? "Demo user"}, ${
+                      user?.plan ?? "Growth"
+                    } plan`}
+                    className="flex min-h-10 cursor-pointer items-center gap-2 rounded-lg px-1 py-1 transition-colors duration-200 hover:bg-muted"
+                  >
+                    <Avatar name={user?.name ?? "Demo"} hue={user?.avatarHue ?? 344} size={32} />
+                    <span className="hidden text-left sm:block" aria-hidden>
+                      <span className="block text-[12.5px] font-semibold leading-tight">
+                        {user?.name ?? "Demo user"}
                       </span>
-                    </summary>
-                    <div className="pop absolute right-0 z-40 mt-2 hidden w-56 overflow-hidden rounded-xl border border-border bg-card p-2 shadow-[var(--shadow-lg)] group-open:block">
+                      <span className="block text-[11px] leading-tight text-muted-foreground">
+                        {user?.plan ?? "Growth"} plan
+                      </span>
+                    </span>
+                  </button>
+                  {accountMenu && (
+                    <div
+                      id="account-menu"
+                      className="pop absolute right-0 z-40 mt-2 w-56 overflow-hidden rounded-xl border border-border bg-card p-2 shadow-[var(--shadow-lg)]"
+                    >
                       <div className="px-2 py-1.5">
                         <p className="text-[13px] font-semibold">{user?.workspace}</p>
                         <p className="text-[11px] text-muted-foreground">{user?.email}</p>
@@ -252,12 +296,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                       <hr className="my-1.5 border-border" />
                       <Link
                         href="/app/settings"
+                        onClick={() => setAccountMenu(false)}
                         className="flex min-h-9 items-center gap-2 rounded-lg px-2 text-[13px] font-medium hover:bg-muted"
                       >
                         <SettingsIcon className="size-4" aria-hidden /> Settings
                       </Link>
                       <Link
                         href="/app/billing"
+                        onClick={() => setAccountMenu(false)}
                         className="flex min-h-9 items-center gap-2 rounded-lg px-2 text-[13px] font-medium hover:bg-muted"
                       >
                         <CreditCard className="size-4" aria-hidden /> Plan & billing
@@ -265,6 +311,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                       <hr className="my-1.5 border-border" />
                       <button
                         onClick={() => {
+                          setAccountMenu(false);
                           logout();
                           router.push("/login");
                         }}
@@ -273,7 +320,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                         <LogOut className="size-4" aria-hidden /> Sign out
                       </button>
                     </div>
-                  </details>
+                  )}
                 </div>
               </div>
             </div>
