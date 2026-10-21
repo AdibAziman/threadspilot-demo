@@ -192,7 +192,6 @@ main:focus-visible {
 }
 
 .btn {
-  display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: var(--space-md);
@@ -211,6 +210,20 @@ main:focus-visible {
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+/* `.btn` used to declare display itself, and unlayered CSS outranks Tailwind's
+   utilities layer, so every display utility written on a button silently lost.
+   Both responsive controls in the workspace top bar were broken by it: the
+   mobile-only "New post" showed on phones and painted over the brand, and the
+   mobile-only nav button showed on desktop, where it mounted an invisible
+   drawer that locked page scrolling. Declaring the default inside the
+   components layer keeps `.btn` inline-flex while letting utilities win. */
+@layer components {
+  .btn {
+    display: inline-flex;
+  }
+}
+
 .btn-primary {
   background: var(--accent);
   color: var(--on-accent);
