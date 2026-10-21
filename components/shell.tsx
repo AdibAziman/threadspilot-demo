@@ -26,6 +26,7 @@ import {
   ListOrdered,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useDialogFocus } from "@/lib/use-dialog-focus";
 import { useStore } from "@/lib/store";
 import { Avatar, Button, Chip } from "./ui";
 
@@ -54,9 +55,21 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const [drawer, setDrawer] = useState(false);
   const [palette, setPalette] = useState(false);
   const [query, setQuery] = useState("");
+  const [cursor, setCursor] = useState(0);
 
   const unread = inbox.filter((i) => i.unread).length;
   const dueCount = posts.filter((p) => p.status === "needs_approval").length;
+
+  const closePalette = () => {
+    setPalette(false);
+    setQuery("");
+    setCursor(0);
+  };
+
+  const drawerRef = useDialogFocus(drawer, () => setDrawer(false), {
+    initialFocus: "#drawer-close",
+  });
+  const paletteRef = useDialogFocus(palette, closePalette, { initialFocus: "#palette-search" });
 
   useEffect(() => setDrawer(false), [pathname]);
 
@@ -66,7 +79,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         e.preventDefault();
         setPalette((p) => !p);
       }
-      if (e.key === "Escape") setPalette(false);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -77,6 +89,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       NAV.filter((n) => n.label.toLowerCase().includes(query.trim().toLowerCase())).slice(0, 7),
     [query]
   );
+  // stays in range when the query shrinks the list
+  const active = results[Math.min(cursor, results.length - 1)];
 
   const nav = (
     <nav className="flex flex-col gap-5" aria-label="Main">
@@ -263,12 +277,23 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
       {/* mobile drawer */}
       {drawer && (
-        <div className="fixed inset-0 z-50 lg:hidden" role="dialog" aria-modal="true" aria-label="Navigation">
+        <div className="fixed inset-0 z-50 lg:hidden">
           <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setDrawer(false)} />
-          <div className="pop relative h-full w-[82%] max-w-xs overflow-y-auto scroll-thin bg-card p-4">
+          <div
+            ref={drawerRef}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Navigation"
+            className="pop relative h-full w-[82%] max-w-xs overflow-y-auto scroll-thin bg-card p-4"
+          >
             <div className="mb-4 flex items-center justify-between">
               <Logo />
-              <button onClick={() => setDrawer(false)} aria-label="Close navigation" className="btn btn-ghost btn-icon">
+              <button
+                id="drawer-close"
+                onClick={() => setDrawer(false)}
+                aria-label="Close navigation"
+                className="btn btn-ghost btn-icon"
+              >
                 <X className="size-4" aria-hidden />
               </button>
             </div>
@@ -328,38 +353,79 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
       {/* command palette */}
       {palette && (
-        <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/50 p-4 pt-[12vh] backdrop-blur-sm" onClick={() => setPalette(false)}>
+        <div
+          className="fixed inset-0 z-50 flex items-start justify-center bg-black/50 p-4 pt-[12vh] backdrop-blur-sm"
+          onClick={closePalette}
+        >
           <div
+            ref={paletteRef}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Search pages"
             className="pop w-full max-w-lg overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-xl)]"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center gap-2 border-b border-border px-4 py-3">
               <Search className="size-4 text-muted-foreground" aria-hidden />
               <input
-                autoFocus
+                id="palette-search"
+                role="combobox"
+                aria-expanded="true"
+                aria-controls="palette-results"
+                aria-autocomplete="list"
+                aria-activedescendant={active ? `palette-option-${active.href}` : undefined}
                 value={query}
-                onChange={(e) => setQuery(e.target.value)}
+                onChange={(e) => {
+                  setQuery(e.target.value);
+                  setCursor(0);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+                    e.preventDefault();
+                    if (results.length === 0) return;
+                    const step = e.key === "ArrowDown" ? 1 : -1;
+                    setCursor((c) => (c + step + results.length) % results.length);
+                  } else if (e.key === "Enter" && active) {
+                    e.preventDefault();
+                    closePalette();
+                    router.push(active.href);
+                  }
+                }}
                 placeholder="Jump to a page…"
                 aria-label="Search pages"
                 className="w-full bg-transparent text-[15px] outline-none placeholder:text-muted-foreground"
               />
               <Chip>Esc</Chip>
             </div>
-            <ul className="max-h-72 overflow-y-auto scroll-thin p-2">
+            <ul
+              id="palette-results"
+              role="listbox"
+              aria-label="Pages"
+              className="max-h-72 overflow-y-auto scroll-thin p-2"
+            >
               {results.length === 0 && (
                 <li className="px-3 py-6 text-center text-[13px] text-muted-foreground">
                   Nothing matches “{query}”.
                 </li>
               )}
-              {results.map((r) => (
-                <li key={r.href}>
+              {results.map((r, i) => (
+                <li
+                  key={r.href}
+                  id={`palette-option-${r.href}`}
+                  role="option"
+                  aria-selected={i === cursor}
+                >
                   <button
                     onClick={() => {
-                      setPalette(false);
-                      setQuery("");
+                      closePalette();
                       router.push(r.href);
                     }}
-                    className="flex w-full cursor-pointer items-center gap-3 rounded-lg px-3 py-2.5 text-left text-[13.5px] font-medium transition-colors duration-150 hover:bg-muted"
+                    onMouseEnter={() => setCursor(i)}
+                    tabIndex={-1}
+                    className={cn(
+                      "flex w-full cursor-pointer items-center gap-3 rounded-lg px-3 py-2.5 text-left text-[13.5px] font-medium transition-colors duration-150 hover:bg-muted",
+                      i === cursor && "bg-muted"
+                    )}
                   >
                     <r.icon className="size-4 text-[var(--primary)]" aria-hidden />
                     {r.label}

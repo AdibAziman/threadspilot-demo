@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useId, useRef, useState } from "react";
+import { useId, useState } from "react";
 import { AlertCircle, Check, Info, TriangleAlert, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useDialogFocus } from "@/lib/use-dialog-focus";
 import { useStore } from "@/lib/store";
 
 /* ---------------- primitives ---------------- */
@@ -274,19 +275,8 @@ export function Modal({
   footer?: React.ReactNode;
   wide?: boolean;
 }) {
-  const ref = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
-    document.addEventListener("keydown", onKey);
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    ref.current?.focus();
-    return () => {
-      document.removeEventListener("keydown", onKey);
-      document.body.style.overflow = prev;
-    };
-  }, [open, onClose]);
+  const titleId = useId();
+  const ref = useDialogFocus(open, onClose);
 
   if (!open) return null;
   return (
@@ -299,7 +289,7 @@ export function Modal({
         tabIndex={-1}
         role="dialog"
         aria-modal="true"
-        aria-label={title}
+        aria-labelledby={titleId}
         onClick={(e) => e.stopPropagation()}
         className={cn(
           "pop max-h-[92vh] w-full overflow-y-auto scroll-thin rounded-t-2xl bg-card p-5 shadow-[var(--shadow-xl)] outline-none sm:rounded-2xl sm:p-6",
@@ -308,7 +298,9 @@ export function Modal({
       >
         <div className="mb-4 flex items-start justify-between gap-4">
           <div>
-            <h3 className="text-[17px] font-bold">{title}</h3>
+            <h3 id={titleId} className="text-[17px] font-bold">
+              {title}
+            </h3>
             {description && (
               <p className="mt-1 text-[13px] text-muted-foreground">{description}</p>
             )}
