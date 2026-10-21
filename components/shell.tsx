@@ -27,6 +27,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useDialogFocus } from "@/lib/use-dialog-focus";
+import { useRouteChangeFocus } from "@/lib/use-route-change";
 import { useStore } from "@/lib/store";
 import { Avatar, Button, Chip } from "./ui";
 
@@ -56,6 +57,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const [palette, setPalette] = useState(false);
   const [query, setQuery] = useState("");
   const [cursor, setCursor] = useState(0);
+
+  useRouteChangeFocus();
 
   const unread = inbox.filter((i) => i.unread).length;
   const dueCount = posts.filter((p) => p.status === "needs_approval").length;
@@ -140,6 +143,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-dvh">
+      {/* Keyboard-only jump past the sidebar and header. First tab stop on the page. */}
+      <a href="#main-content" className="skip-link">
+        Skip to content
+      </a>
+
       {/* demo ribbon */}
       <div className="flex items-center justify-center gap-2 bg-[var(--foreground)] px-3 py-1.5 text-center text-[11.5px] font-semibold text-[var(--background)]">
         <span className="pulse-dot size-1.5 rounded-full bg-[var(--primary)]" aria-hidden />
@@ -271,7 +279,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             </div>
           </header>
 
-          <main className="min-w-0 flex-1 px-3 pb-28 pt-4 sm:px-5 lg:pb-10">{children}</main>
+          <main
+            id="main-content"
+            tabIndex={-1}
+            className="min-w-0 flex-1 px-3 pb-28 pt-4 sm:px-5 lg:pb-10"
+          >
+            {children}
+          </main>
         </div>
       </div>
 

@@ -120,6 +120,45 @@ body {
   border-radius: 4px;
 }
 
+/* The workspace main region is a focus target, not a control: it needs no ring. */
+main:focus,
+main:focus-visible {
+  outline: none;
+}
+
+/* Keyboard-only jump link. Sits at 1px and clipped until it takes focus, then
+   pins over the sticky header so it can never be scrolled out of reach. */
+.skip-link {
+  position: fixed;
+  top: 8px;
+  left: 8px;
+  z-index: 60;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border-radius: 8px;
+  background: var(--foreground);
+  color: var(--background);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.skip-link:focus,
+.skip-link:focus-visible {
+  width: auto;
+  height: auto;
+  overflow: visible;
+  clip-path: none;
+  white-space: normal;
+  padding: 10px 14px;
+  box-shadow: var(--shadow-lg);
+  /* A halo in the page colour separates it from the dark demo ribbon it covers. */
+  outline: 2px solid var(--card);
+  outline-offset: 2px;
+}
+
 ::selection {
   background: var(--primary);
   color: var(--on-primary);
