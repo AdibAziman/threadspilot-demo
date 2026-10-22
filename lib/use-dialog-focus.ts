@@ -39,10 +39,18 @@ export function useDialogFocus(
 
     const opener = document.activeElement as HTMLElement | null;
 
+    /**
+     * Only what the browser will actually stop on with Tab. The selector alone
+     * is not enough: a button carrying tabIndex={-1} still matches
+     * `button:not([disabled])`, so it would become the trap's idea of "last"
+     * and the wrap could never fire - which is how Tab used to walk out of the
+     * command palette into the page behind it, because the listbox rows are
+     * removed from the tab order on purpose and the trap kept counting them.
+     */
     const focusables = () =>
-      Array.from(node.querySelectorAll<HTMLElement>(FOCUSABLE)).filter(
-        (el) => el.offsetWidth > 0 || el.offsetHeight > 0 || el === document.activeElement
-      );
+      Array.from(node.querySelectorAll<HTMLElement>(FOCUSABLE))
+        .filter((el) => el.tabIndex >= 0)
+        .filter((el) => el.offsetWidth > 0 || el.offsetHeight > 0 || el === document.activeElement);
 
     const preferred = initialFocus ? node.querySelector<HTMLElement>(initialFocus) : null;
     (preferred ?? focusables()[0] ?? node).focus();

@@ -60,6 +60,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const [accountMenu, setAccountMenu] = useState(false);
   const accountMenuRef = useRef<HTMLDivElement>(null);
   const accountTriggerRef = useRef<HTMLButtonElement>(null);
+  const activeOptionRef = useRef<HTMLLIElement>(null);
 
   useRouteChangeFocus();
 
@@ -126,6 +127,19 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   );
   // stays in range when the query shrinks the list
   const active = results[Math.min(cursor, results.length - 1)];
+
+  /**
+   * The highlight is the only thing telling a keyboard user which page Enter
+   * will open, so it has to stay in frame. The results list is the one scroll
+   * container in here and its seven rows run a few pixels past its 288px
+   * frame, so the last row used to sit just under the fold while the cursor
+   * was already on it - and now that Tab no longer lands on the list itself,
+   * the arrow keys are the only way to move at all.
+   */
+  useEffect(() => {
+    if (!palette) return;
+    activeOptionRef.current?.scrollIntoView({ block: "nearest" });
+  }, [palette, cursor, results]);
 
   const nav = (
     <nav className="flex flex-col gap-5" aria-label="Main">
@@ -475,6 +489,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   id={`palette-option-${r.href}`}
                   role="option"
                   aria-selected={i === cursor}
+                  ref={i === cursor ? activeOptionRef : null}
                 >
                   <button
                     onClick={() => {
