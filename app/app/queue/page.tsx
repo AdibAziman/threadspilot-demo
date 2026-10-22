@@ -181,9 +181,9 @@ export default function QueuePage() {
                   </th>
                   <th className="px-3 py-2.5 font-bold">Post</th>
                   <th className="w-40 px-3 py-2.5 font-bold">When</th>
-                  <th className="w-28 px-3 py-2.5 font-bold">Status</th>
-                  <th className="w-32 px-3 py-2.5 font-bold">Author</th>
-                  <th className="w-44 px-3 py-2.5 font-bold">Engagement</th>
+                  <th className="hidden w-28 px-3 py-2.5 font-bold xl:table-cell">Status</th>
+                  <th className="hidden w-32 px-3 py-2.5 font-bold 2xl:table-cell">Author</th>
+                  <th className="hidden w-44 px-3 py-2.5 font-bold 2xl:table-cell">Engagement</th>
                   <th className="w-40 px-3 py-2.5 text-right font-bold">Actions</th>
                 </tr>
               </thead>
@@ -204,18 +204,25 @@ export default function QueuePage() {
                     <td className="max-w-0 px-3 py-3 align-top">
                       <p className="line-clamp-2 font-medium">{p.text}</p>
                       <div className="mt-1 flex flex-wrap items-center gap-1.5">
+                        <span className="xl:hidden">
+                          <StatusPill status={p.status} />
+                        </span>
                         {p.slotId && <Chip>slot</Chip>}
                         {p.thread.length > 0 && <Chip>+{p.thread.length} thread</Chip>}
                         {p.mediaUrl && <Chip>media</Chip>}
                         {p.tags.map((t) => (
                           <Chip key={t} tone="accent">#{t}</Chip>
                         ))}
-                        {p.error && <Chip tone="warn">{p.error.slice(0, 38)}…</Chip>}
+                        {p.error && (
+                          <Chip tone="warn" className="max-w-full">
+                            <span className="min-w-0 truncate">{p.error.slice(0, 38)}…</span>
+                          </Chip>
+                        )}
                       </div>
                     </td>
                     <td className="px-3 py-3 align-top">
-                      <p className="font-mono text-[12px]">{p.scheduledAt ? fmtDateTime(p.scheduledAt) : "—"}</p>
-                      <p className="text-[11.5px] text-muted-foreground">
+                      <p className="whitespace-nowrap font-mono text-[12px]">{p.scheduledAt ? fmtDateTime(p.scheduledAt) : "—"}</p>
+                      <p className="whitespace-nowrap text-[11.5px] text-muted-foreground">
                         {p.status === "published"
                           ? `posted ${countdown(p.publishedAt ?? p.createdAt)}`
                           : p.scheduledAt
@@ -223,11 +230,11 @@ export default function QueuePage() {
                             : ""}
                       </p>
                     </td>
-                    <td className="px-3 py-3 align-top">
+                    <td className="hidden px-3 py-3 align-top xl:table-cell">
                       <StatusPill status={p.status} />
                     </td>
-                    <td className="px-3 py-3 align-top text-[12.5px] text-muted-foreground">{p.author}</td>
-                    <td className="px-3 py-3 align-top">
+                    <td className="hidden px-3 py-3 align-top text-[12.5px] text-muted-foreground 2xl:table-cell">{p.author}</td>
+                    <td className="hidden px-3 py-3 align-top 2xl:table-cell">
                       {p.metrics ? (
                         <div className="flex flex-col gap-0.5 text-[12px] text-muted-foreground">
                           <span>{p.metrics.likes.toLocaleString()} likes</span>
