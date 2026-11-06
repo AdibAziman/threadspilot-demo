@@ -72,7 +72,7 @@ export default function Landing() {
             <a href="#pricing" className="transition-colors hover:text-foreground">Pricing</a>
           </nav>
           <div className="ml-auto flex items-center gap-2">
-            <Link href="/login" className="btn btn-ghost btn-sm">Sign in</Link>
+            <Link href="/login" className="btn btn-ghost btn-sm hidden sm:inline-flex">Sign in</Link>
             <Link href="/login" className="btn btn-brand btn-sm">
               Open live demo
               <ArrowRight className="size-3.5" aria-hidden />
