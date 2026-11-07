@@ -62,6 +62,7 @@ export default function AnalyticsPage() {
     <div className="flex flex-col gap-5">
       <SectionHeader
         level={1}
+        className="[&>div:last-child]:w-full sm:[&>div:last-child]:w-auto"
         title="Analytics"
         subtitle={`Threads account ${connection.handle} · rolling ${range} days`}
         right={
@@ -81,11 +82,11 @@ export default function AnalyticsPage() {
         <Kpi label="Replies" value={totals.replies.toLocaleString()} delta="+21%" hint="replies beat likes on Threads" icon={<MessageCircle className="size-4" aria-hidden />} />
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-2">
-        <Card className="flex flex-col gap-3">
+      <div className="grid min-w-0 gap-4 lg:grid-cols-2">
+        <Card className="min-w-0 flex flex-col gap-3">
           <SectionHeader title="Follower growth" subtitle="Net new per week" />
           <Sparkline values={analytics.followers} label="Followers" tone="var(--primary)" />
-          <div className="flex items-center gap-2 text-[12.5px]">
+          <div className="flex flex-wrap items-center gap-2 text-[12.5px]">
             <Chip tone="success">
               <TrendingUp className="size-3" aria-hidden />
               +4,060 in 14 weeks
@@ -94,7 +95,7 @@ export default function AnalyticsPage() {
           </div>
         </Card>
 
-        <Card className="flex flex-col gap-3">
+        <Card className="min-w-0 flex flex-col gap-3">
           <SectionHeader title="Reach by week" subtitle="Impressions, published posts" />
           <BarTrend
             values={analytics.reach}
