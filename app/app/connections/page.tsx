@@ -68,7 +68,7 @@ export default function ConnectionsPage() {
         </div>
       )}
 
-      <div className="grid gap-4 lg:grid-cols-[1.2fr_1fr]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-4 lg:grid-cols-[1.2fr_1fr]">
         <Card className="flex flex-col gap-4">
           <SectionHeader
             title="Threads account"
