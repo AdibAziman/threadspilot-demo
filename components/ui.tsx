@@ -377,7 +377,7 @@ export function Tabs({
           aria-selected={active === t.id}
           onClick={() => onChange(t.id)}
           className={cn(
-            "flex shrink-0 cursor-pointer items-center gap-1.5 rounded-lg px-3 py-2 text-[13px] font-semibold transition-colors duration-200",
+            "flex min-h-11 shrink-0 cursor-pointer items-center gap-1.5 rounded-lg px-3 py-2 text-[13px] font-semibold transition-colors duration-200",
             active === t.id
               ? "bg-[var(--primary)] text-[var(--on-primary)]"
               : "text-muted-foreground hover:bg-muted"
