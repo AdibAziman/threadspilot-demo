@@ -211,18 +211,23 @@ export function Switch({
         aria-checked={checked}
         aria-label={label ?? "toggle"}
         onClick={() => onChange(!checked)}
-        className={cn(
-          "relative h-6 w-11 shrink-0 cursor-pointer rounded-full border transition-colors duration-200",
-          checked ? "bg-[var(--primary)] border-[var(--primary)]" : "bg-muted border-border"
-        )}
+        className="grid size-11 shrink-0 cursor-pointer place-items-center rounded-full"
       >
         <span
+          aria-hidden
           className={cn(
-            "absolute top-0.5 size-4.5 rounded-full bg-white shadow-sm transition-all duration-200",
-            checked ? "left-[22px]" : "left-0.5"
+            "relative h-6 w-11 rounded-full border transition-colors duration-200",
+            checked ? "bg-[var(--primary)] border-[var(--primary)]" : "bg-muted border-border"
           )}
-          style={{ height: 18, width: 18 }}
-        />
+        >
+          <span
+            className={cn(
+              "absolute top-0.5 rounded-full bg-white shadow-sm transition-all duration-200",
+              checked ? "left-[22px]" : "left-0.5"
+            )}
+            style={{ height: 18, width: 18 }}
+          />
+        </span>
       </button>
     </div>
   );
