@@ -512,8 +512,8 @@ export function Toaster() {
           </div>
           <button
             onClick={() => dismissToast(t.id)}
-            aria-label="Dismiss"
-            className="cursor-pointer text-muted-foreground transition-colors hover:text-foreground"
+            aria-label={`Dismiss ${t.title} notification`}
+            className="grid size-11 shrink-0 cursor-pointer place-items-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
           >
             <X className="size-3.5" aria-hidden />
           </button>
