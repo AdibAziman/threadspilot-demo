@@ -374,12 +374,29 @@ export function Tabs({
     <div
       role="tablist"
       className="flex max-w-full min-w-0 gap-1 overflow-x-auto rounded-xl border border-border bg-card p-1 scroll-thin"
+      onKeyDown={(event) => {
+        if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+        event.preventDefault();
+        const buttons = Array.from(
+          event.currentTarget.querySelectorAll<HTMLButtonElement>('[role="tab"]')
+        );
+        const current = buttons.indexOf(document.activeElement as HTMLButtonElement);
+        const next =
+          event.key === "Home"
+            ? 0
+            : event.key === "End"
+              ? buttons.length - 1
+              : (current + (event.key === "ArrowRight" ? 1 : -1) + buttons.length) % buttons.length;
+        buttons[next]?.focus();
+        buttons[next]?.click();
+      }}
     >
       {tabs.map((t) => (
         <button
           key={t.id}
           role="tab"
           aria-selected={active === t.id}
+          tabIndex={active === t.id ? 0 : -1}
           onClick={() => onChange(t.id)}
           className={cn(
             "flex min-h-11 shrink-0 cursor-pointer items-center gap-1.5 rounded-lg px-3 py-2 text-[13px] font-semibold transition-colors duration-200",
