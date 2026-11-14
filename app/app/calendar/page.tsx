@@ -26,6 +26,8 @@ export default function CalendarPage() {
   const [dragId, setDragId] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState<string | null>(null);
   const [slotModal, setSlotModal] = useState(false);
+  const [reschedulePost, setReschedulePost] = useState<Post | null>(null);
+  const [rescheduleDate, setRescheduleDate] = useState("");
   const [draft, setDraft] = useState({ label: "", time: "18:00", days: [1, 3, 5] as number[], category: CATEGORIES[0] });
 
   const byDay = useMemo(() => {
@@ -71,6 +73,19 @@ export default function CalendarPage() {
     setDragId(null);
     if (!post) return;
     moveTo(day, post);
+  }
+
+  function openReschedule(post: Post) {
+    const scheduled = new Date(post.scheduledAt ?? Date.now());
+    setReschedulePost(post);
+    setRescheduleDate(
+      scheduled.toLocaleDateString("en-CA", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        timeZone: "Asia/Kuala_Lumpur",
+      })
+    );
   }
 
   const monthLabel = cursor.toLocaleDateString("en-GB", { month: "long", year: "numeric" });
@@ -168,6 +183,8 @@ export default function CalendarPage() {
                               draggable
                               onDragStart={() => setDragId(p.id)}
                               onDragEnd={() => setDragId(null)}
+                              onClick={() => openReschedule(p)}
+                              aria-label={`Reschedule ${fmtTime(p.scheduledAt!)} post: ${p.text.slice(0, 60)}`}
                               className={cn(
                                 "w-full cursor-grab rounded-md border-l-[3px] px-1.5 py-1 text-left text-[10.5px] leading-tight transition-opacity duration-150 active:cursor-grabbing",
                                 dragId === p.id && "opacity-50",
@@ -229,6 +246,9 @@ export default function CalendarPage() {
                             <button
                               draggable
                               onDragStart={() => setDragId(p.id)}
+                              onDragEnd={() => setDragId(null)}
+                              onClick={() => openReschedule(p)}
+                              aria-label={`Reschedule ${fmtTime(p.scheduledAt!)} post: ${p.text.slice(0, 60)}`}
                               className="w-full cursor-grab rounded-lg border border-border bg-background p-1.5 text-left text-[11px] leading-tight active:cursor-grabbing"
                             >
                               <span className="font-mono font-bold text-[var(--accent)]">
@@ -257,7 +277,11 @@ export default function CalendarPage() {
                 .filter((p) => p.scheduledAt)
                 .sort((a, b) => new Date(a.scheduledAt!).getTime() - new Date(b.scheduledAt!).getTime())
                 .map((p) => (
-                  <div key={p.id} className="flex items-center gap-3 rounded-xl border border-border p-3">
+                  <button
+                    key={p.id}
+                    onClick={() => openReschedule(p)}
+                    className="flex min-h-11 w-full cursor-pointer items-center gap-3 rounded-xl border border-border p-3 text-left transition-colors hover:bg-muted/50"
+                  >
                     <span className="w-16 shrink-0 font-mono text-[12px] font-bold text-[var(--accent)]">
                       {new Date(p.scheduledAt!).toLocaleDateString("en-GB", {
                         day: "2-digit",
@@ -270,7 +294,7 @@ export default function CalendarPage() {
                     </span>
                     <p className="min-w-0 flex-1 line-clamp-1 text-[13px]">{p.text}</p>
                     <StatusPill status={p.status} />
-                  </div>
+                  </button>
                 ))}
             </Card>
           )}
@@ -361,6 +385,53 @@ export default function CalendarPage() {
           </Card>
         </div>
       </div>
+
+      <Modal
+        open={Boolean(reschedulePost)}
+        onClose={() => setReschedulePost(null)}
+        title="Reschedule post"
+        description="Choose a new date. The original posting time stays the same."
+        footer={
+          <>
+            <Button variant="ghost" onClick={() => setReschedulePost(null)}>
+              Cancel
+            </Button>
+            <Button
+              variant="brand"
+              disabled={!rescheduleDate}
+              onClick={() => {
+                if (!reschedulePost || !rescheduleDate) return;
+                const nextDate = new Date(`${rescheduleDate}T00:00:00`);
+                moveTo(nextDate, reschedulePost);
+                toast({
+                  title: "Post rescheduled",
+                  body: `Moved to ${nextDate.toLocaleDateString("en-GB", {
+                    day: "numeric",
+                    month: "short",
+                    year: "numeric",
+                  })}`,
+                  tone: "ok",
+                });
+                setReschedulePost(null);
+              }}
+            >
+              Save date
+            </Button>
+          </>
+        }
+      >
+        <Field
+          label="New date"
+          hint={reschedulePost ? `Posting time stays ${fmtTime(reschedulePost.scheduledAt!)}` : undefined}
+        >
+          <input
+            type="date"
+            className="input"
+            value={rescheduleDate}
+            onChange={(event) => setRescheduleDate(event.target.value)}
+          />
+        </Field>
+      </Modal>
 
       <Modal
         open={slotModal}
