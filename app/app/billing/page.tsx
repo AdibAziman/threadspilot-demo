@@ -109,15 +109,27 @@ export default function BillingPage() {
 
         <Card className="flex flex-col gap-3">
           <SectionHeader title="Payment method" />
-          <div className="flex items-center gap-3 rounded-xl border border-border p-3">
-            <span className="grid size-10 place-items-center rounded-lg bg-muted">
-              <CreditCard className="size-5 text-muted-foreground" aria-hidden />
-            </span>
-            <div className="min-w-0 flex-1">
-              <p className="text-[13px] font-semibold">No card on file</p>
-              <p className="text-[11.5px] text-muted-foreground">Demo workspace, billing disabled</p>
+          <div className="flex flex-col gap-3 rounded-xl border border-border p-3 sm:flex-row sm:items-center">
+            <div className="flex min-w-0 flex-1 items-center gap-3">
+              <span className="grid size-10 shrink-0 place-items-center rounded-lg bg-muted">
+                <CreditCard className="size-5 text-muted-foreground" aria-hidden />
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="text-[13px] font-semibold">No card on file</p>
+                <p className="text-[11.5px] text-muted-foreground">Demo workspace, billing disabled</p>
+              </div>
             </div>
-            <Button size="sm" variant="outline">
+            <Button
+              className="w-full sm:w-auto"
+              variant="outline"
+              onClick={() =>
+                toast({
+                  title: "Payment setup unavailable",
+                  body: "This demo workspace cannot store a payment method.",
+                  tone: "info",
+                })
+              }
+            >
               Add card
             </Button>
           </div>
