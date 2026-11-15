@@ -34,7 +34,7 @@ export default function InboxPage() {
   const { inbox, refreshInbox, markInboxRead, sendInboxReply, markAllInboxRead, toast } = useStore();
   const [filter, setFilter] = useState("all");
   const [activeId, setActiveId] = useState(inbox[0]?.id ?? null);
-  const [draft, setDraft] = useState("");
+  const [draft, setDraft] = useState<string | null>(null);
   const [regenerating, setRegenerating] = useState(false);
 
   const rows = useMemo(() => {
@@ -45,6 +45,7 @@ export default function InboxPage() {
   }, [inbox, filter]);
 
   const active = inbox.find((i) => i.id === activeId) ?? rows[0] ?? null;
+  const replyDraft = draft ?? active?.aiDraft ?? "";
   const unread = inbox.filter((i) => i.unread).length;
 
   async function regenerate() {
@@ -56,7 +57,9 @@ export default function InboxPage() {
       "Good question. We solved it by capping the queue per day, so the publisher never hits the API limit mid-run.",
       "That is the tension worth naming. Speed of drafting and quality of judgement pull in opposite directions, so we keep the human on the approval step.",
     ];
-    refreshInbox(active.id, variants[Math.floor(Math.random() * variants.length)]);
+    const nextDraft = variants[Math.floor(Math.random() * variants.length)];
+    refreshInbox(active.id, nextDraft);
+    setDraft(nextDraft);
     setRegenerating(false);
     toast({ title: "New suggestion drafted", tone: "info" });
   }
@@ -196,7 +199,7 @@ export default function InboxPage() {
               <textarea
                 id="reply-draft"
                 className="textarea min-h-[110px]"
-                value={draft || active.aiDraft}
+                value={replyDraft}
                 onChange={(e) => setDraft(e.target.value)}
                 placeholder="Write your reply…"
               />
@@ -214,6 +217,7 @@ export default function InboxPage() {
                 <Button
                   variant="brand"
                   icon={<Send className="size-4" aria-hidden />}
+                  disabled={!replyDraft.trim()}
                   onClick={() => {
                     sendInboxReply(active.id);
                     setDraft("");
