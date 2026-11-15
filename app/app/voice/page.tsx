@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Check, Loader2, Plus, Sparkles, Trash2, Wand2, X } from "lucide-react";
 import { Button, Card, Chip, Field, SectionHeader } from "@/components/ui";
 import { useStore } from "@/lib/store";
@@ -19,6 +19,7 @@ export default function VoicePage() {
   const [sampleDraft, setSampleDraft] = useState("");
   const [test, setTest] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const bannedWordRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
   async function generate() {
     setBusy(true);
@@ -128,11 +129,20 @@ export default function VoicePage() {
           <Card className="flex flex-col gap-3">
             <SectionHeader title="Banned words" subtitle="Blocked at draft time, before you ever see them" />
             <div className="flex flex-wrap gap-1.5">
-              {voice.bannedWords.map((w) => (
+              {voice.bannedWords.map((w, index) => (
                 <button
                   key={w}
-                  onClick={() => updateVoice({ bannedWords: voice.bannedWords.filter((x) => x !== w) })}
-                  className="chip cursor-pointer border-[color-mix(in_srgb,var(--destructive)_28%,transparent)] bg-[color-mix(in_srgb,var(--destructive)_10%,transparent)] text-[var(--destructive)]"
+                  ref={(button) => {
+                    bannedWordRefs.current[index] = button;
+                  }}
+                  onClick={() => {
+                    updateVoice({ bannedWords: voice.bannedWords.filter((x) => x !== w) });
+                    requestAnimationFrame(() =>
+                      bannedWordRefs.current[Math.min(index, voice.bannedWords.length - 2)]?.focus()
+                    );
+                  }}
+                  aria-label={`Remove ${w} from banned words`}
+                  className="chip min-h-11 cursor-pointer border-[color-mix(in_srgb,var(--destructive)_28%,transparent)] bg-[color-mix(in_srgb,var(--destructive)_10%,transparent)] text-[var(--destructive)]"
                 >
                   {w}
                   <X className="size-3" aria-hidden />
