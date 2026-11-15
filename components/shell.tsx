@@ -231,7 +231,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               <button
                 onClick={() => setDrawer(true)}
                 aria-label="Open navigation"
-                className="btn btn-ghost btn-icon lg:hidden"
+                className="btn btn-ghost btn-icon shrink-0 lg:hidden"
               >
                 <Menu className="size-5" aria-hidden />
               </button>
@@ -263,7 +263,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 <button
                   onClick={() => setTheme(settings.theme === "dark" ? "light" : "dark")}
                   aria-label="Toggle colour theme"
-                  className="btn btn-ghost btn-icon"
+                  className="btn btn-ghost btn-icon shrink-0"
                 >
                   {settings.theme === "dark" ? (
                     <Sun className="size-4.5" aria-hidden />
@@ -271,7 +271,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                     <Moon className="size-4.5" aria-hidden />
                   )}
                 </button>
-                <Link href="/app/inbox" className="btn btn-ghost btn-icon relative" aria-label="Notifications">
+                <Link href="/app/inbox" className="btn btn-ghost btn-icon relative shrink-0" aria-label="Notifications">
                   <Bell className="size-4.5" aria-hidden />
                   {unread > 0 && (
                     <span className="absolute right-2 top-2 size-2 rounded-full bg-[var(--primary)]" />
@@ -286,7 +286,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                     aria-label={`Account menu, ${user?.name ?? "Demo user"}, ${
                       user?.plan ?? "Growth"
                     } plan`}
-                    className="flex min-h-10 cursor-pointer items-center gap-2 rounded-lg px-1 py-1 transition-colors duration-200 hover:bg-muted"
+                    className="flex min-h-11 min-w-11 shrink-0 cursor-pointer items-center gap-2 rounded-lg px-1 py-1 transition-colors duration-200 hover:bg-muted"
                   >
                     <Avatar name={user?.name ?? "Demo"} hue={user?.avatarHue ?? 344} size={32} />
                     <span className="hidden text-left sm:block" aria-hidden>
@@ -367,7 +367,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 id="drawer-close"
                 onClick={() => setDrawer(false)}
                 aria-label="Close navigation"
-                className="btn btn-ghost btn-icon"
+                className="btn btn-ghost btn-icon shrink-0"
               >
                 <X className="size-4" aria-hidden />
               </button>
@@ -523,7 +523,12 @@ export function Logo({ compact }: { compact?: boolean }) {
       <span className="grid size-7 place-items-center rounded-lg bg-[var(--foreground)] text-[var(--background)]">
         <Sparkles className="size-4" aria-hidden />
       </span>
-      <span className="text-[15px] font-extrabold tracking-tight">
+      <span
+        className={cn(
+          "text-[15px] font-extrabold tracking-tight",
+          compact && "hidden min-[360px]:inline"
+        )}
+      >
         Threads<span className="text-[var(--primary)]">Pilot</span>
         {!compact && (
           <span className="ml-1.5 rounded bg-muted px-1 py-0.5 align-middle text-[9px] font-bold uppercase tracking-wide text-muted-foreground">
