@@ -80,7 +80,7 @@ export default function BillingPage() {
                   {k.v}
                   <span className="text-[12px] font-medium text-muted-foreground"> / {k.m}</span>
                 </p>
-                <Progress value={Number(k.v)} max={k.m} className="mt-2" />
+                <Progress value={Number(k.v)} max={k.m} label={k.l} className="mt-2" />
               </div>
             ))}
           </div>

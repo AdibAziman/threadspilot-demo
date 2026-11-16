@@ -76,7 +76,12 @@ export default function AutomationPage() {
             <p className="mt-0.5 text-[12.5px] text-muted-foreground">
               Hard ceiling {totalCap} interactions per day, spread across your active hours
             </p>
-            <Progress value={totalToday} max={Math.max(1, totalCap)} className="mt-2" />
+            <Progress
+              value={totalToday}
+              max={Math.max(1, totalCap)}
+              label="Automation actions used today"
+              className="mt-2"
+            />
           </div>
         </Card>
         <Card className="flex flex-col justify-center gap-2">
@@ -90,7 +95,12 @@ export default function AutomationPage() {
               / {connection.replyQuotaTotal.toLocaleString()}
             </span>
           </p>
-          <Progress value={connection.replyQuotaUsed} max={connection.replyQuotaTotal} tone="accent" />
+          <Progress
+            value={connection.replyQuotaUsed}
+            max={connection.replyQuotaTotal}
+            label="Reply quota used today"
+            tone="accent"
+          />
         </Card>
       </div>
 
@@ -130,6 +140,7 @@ export default function AutomationPage() {
               <Progress
                 value={r.usedToday}
                 max={r.dailyCap}
+                label={`${r.name} actions used today`}
                 tone={r.usedToday / r.dailyCap > 0.85 ? "warn" : "brand"}
                 className="mt-1.5"
               />

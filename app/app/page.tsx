@@ -244,7 +244,12 @@ export default function DashboardPage() {
                           {filled}/{target}
                         </span>
                       </div>
-                      <Progress value={filled} max={target} className="mt-1.5" />
+                      <Progress
+                        value={filled}
+                        max={target}
+                        label={`${s.label} slot fill`}
+                        className="mt-1.5"
+                      />
                       <p className="mt-1 text-[11px] text-muted-foreground">
                         {s.days.map((d) => DAY_LABELS[d]).join(", ")}
                         {!s.enabled && " · paused"}

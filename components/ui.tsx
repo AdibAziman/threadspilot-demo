@@ -269,11 +269,13 @@ export function Progress({
   max = 100,
   tone = "brand",
   className,
+  label,
 }: {
   value: number;
   max?: number;
   tone?: "brand" | "accent" | "success" | "warn" | "destructive";
   className?: string;
+  label: string;
 }) {
   const pct = Math.min(100, Math.round((value / max) * 100));
   const tones: Record<string, string> = {
@@ -287,6 +289,7 @@ export function Progress({
     <div
       className={cn("h-2 w-full overflow-hidden rounded-full bg-muted", className)}
       role="progressbar"
+      aria-label={label}
       aria-valuenow={pct}
       aria-valuemin={0}
       aria-valuemax={100}

@@ -12,7 +12,7 @@ import {
   Unplug,
   Webhook,
 } from "lucide-react";
-import { Button, Card, Chip, Field, Progress, SectionHeader, Switch } from "@/components/ui";
+import { Button, Card, Chip, Field, SectionHeader, Switch } from "@/components/ui";
 import { Gauge } from "@/components/charts";
 import { useStore } from "@/lib/store";
 import { fmtDateTime, relTime } from "@/lib/utils";
@@ -268,7 +268,7 @@ export default function ConnectionsPage() {
             </div>
           ))}
         </div>
-        <Progress value={1} max={1} className="opacity-0" />
+        <div className="h-2" aria-hidden />
       </Card>
     </div>
   );
