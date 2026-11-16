@@ -65,7 +65,7 @@ export default function VoicePage() {
                       ),
                     })
                   }
-                  className="mt-1.5 h-2 w-full cursor-pointer appearance-none rounded-full bg-muted accent-[var(--primary)]"
+                  className="range-control mt-1.5"
                 />
                 <div className="mt-1 flex justify-between text-[11px] text-muted-foreground">
                   <span>{TONE_HINTS[t.label]?.low}</span>
@@ -88,7 +88,7 @@ export default function VoicePage() {
                 value={voice.emojiUse}
                 aria-label="Emoji use"
                 onChange={(e) => updateVoice({ emojiUse: Number(e.target.value) })}
-                className="mt-1.5 h-2 w-full cursor-pointer appearance-none rounded-full bg-muted accent-[var(--primary)]"
+                className="range-control mt-1.5"
               />
             </div>
             <div>
@@ -103,7 +103,7 @@ export default function VoicePage() {
                 value={voice.hashtagUse}
                 aria-label="Hashtag use"
                 onChange={(e) => updateVoice({ hashtagUse: Number(e.target.value) })}
-                className="mt-1.5 h-2 w-full cursor-pointer appearance-none rounded-full bg-muted accent-[var(--primary)]"
+                className="range-control mt-1.5"
               />
             </div>
           </div>
