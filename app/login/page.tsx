@@ -8,7 +8,7 @@ import { Button, Field } from "@/components/ui";
 import { useStore } from "@/lib/store";
 
 export default function LoginPage() {
-  const { login } = useStore();
+  const { login, toast } = useStore();
   const router = useRouter();
   const [email, setEmail] = useState("demo@threadspilot.app");
   const [password, setPassword] = useState("demo1234");
@@ -74,7 +74,19 @@ export default function LoginPage() {
                 <input type="checkbox" defaultChecked className="size-4 accent-[var(--primary)]" />
                 Keep me signed in
               </label>
-              <span className="font-semibold text-[var(--primary)]">Forgot password?</span>
+              <button
+                type="button"
+                onClick={() =>
+                  toast({
+                    title: "Password reset is disabled in the demo",
+                    body: "Use the prefilled demo credentials to sign in.",
+                    tone: "info",
+                  })
+                }
+                className="flex min-h-11 cursor-pointer items-center rounded-lg px-2 font-semibold text-[var(--primary)] transition-colors hover:bg-muted"
+              >
+                Forgot password?
+              </button>
             </div>
 
             <Button type="submit" variant="brand" disabled={busy} className="w-full">
