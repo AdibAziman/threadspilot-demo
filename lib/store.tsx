@@ -80,7 +80,7 @@ type Ctx = State & {
   toast: (t: Omit<Toast, "id">) => void;
   dismissToast: (id: string) => void;
   login: (email: string, password: string) => Promise<boolean>;
-  register: (name: string, email: string, password: string) => Promise<boolean>;
+  register: (name: string, email: string, password: string, workspace: string) => Promise<boolean>;
   logout: () => void;
   resetDemo: () => void;
   savePost: (post: Post) => void;
@@ -285,10 +285,13 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         patch((s) => ({ ...s, user: { ...DEMO_USER, email } }));
         return true;
       },
-      register: async (name, email, password) => {
+      register: async (name, email, password, workspace) => {
         await new Promise((r) => setTimeout(r, 900));
         if (!name || !email.includes("@") || password.length < 4) return false;
-        patch((s) => ({ ...s, user: { ...DEMO_USER, name, email } }));
+        patch((s) => ({
+          ...s,
+          user: { ...DEMO_USER, name, email, workspace: workspace.trim() || DEMO_USER.workspace },
+        }));
         return true;
       },
       logout: () => patch((s) => ({ ...s, user: null })),

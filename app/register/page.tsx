@@ -27,7 +27,7 @@ export default function RegisterPage() {
     e.preventDefault();
     setBusy(true);
     setError(null);
-    const ok = await register(form.name, form.email, form.password);
+    const ok = await register(form.name, form.email, form.password, form.workspace);
     setBusy(false);
     if (!ok) {
       setError("Fill in your name, a valid email and a 4+ character password.");
