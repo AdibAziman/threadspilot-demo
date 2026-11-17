@@ -29,6 +29,28 @@ const FILTERS = [
   { id: "draft", label: "Drafts" },
 ];
 
+function SelectionCheckbox({
+  label,
+  checked,
+  onChange,
+}: {
+  label: string;
+  checked: boolean;
+  onChange: (checked: boolean) => void;
+}) {
+  return (
+    <label className="grid size-11 shrink-0 cursor-pointer place-items-center rounded-lg transition-colors hover:bg-muted has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-[var(--ring)]">
+      <input
+        type="checkbox"
+        aria-label={label}
+        checked={checked}
+        onChange={(event) => onChange(event.target.checked)}
+        className="size-4 accent-[var(--primary)] focus-visible:outline-none"
+      />
+    </label>
+  );
+}
+
 export default function QueuePage() {
   const {
     posts,
@@ -150,7 +172,7 @@ export default function QueuePage() {
           </Button>
           <button
             onClick={() => setSelected([])}
-            className="ml-auto cursor-pointer text-[12.5px] font-semibold text-muted-foreground hover:text-foreground"
+            className="ml-auto min-h-11 cursor-pointer rounded-lg px-2 text-[12.5px] font-semibold text-muted-foreground hover:bg-muted hover:text-foreground"
           >
             Clear selection
           </button>
@@ -170,13 +192,11 @@ export default function QueuePage() {
             <table className="w-full text-left text-[13px]">
               <thead>
                 <tr className="border-b border-border text-[11.5px] uppercase tracking-wide text-muted-foreground">
-                  <th className="w-10 px-3 py-2.5">
-                    <input
-                      type="checkbox"
-                      aria-label="Select all"
+                  <th className="w-12 px-0.5 py-1">
+                    <SelectionCheckbox
+                      label="Select all"
                       checked={allSelected}
-                      onChange={(e) => setSelected(e.target.checked ? rows.map((r) => r.id) : [])}
-                      className="size-4 accent-[var(--primary)]"
+                      onChange={(checked) => setSelected(checked ? rows.map((r) => r.id) : [])}
                     />
                   </th>
                   <th className="px-3 py-2.5 font-bold">Post</th>
@@ -190,15 +210,13 @@ export default function QueuePage() {
               <tbody>
                 {rows.map((p) => (
                   <tr key={p.id} className="border-b border-border last:border-0 hover:bg-muted/60">
-                    <td className="px-3 py-3 align-top">
-                      <input
-                        type="checkbox"
-                        aria-label={`Select post ${p.text.slice(0, 30)}`}
+                    <td className="px-0.5 py-1 align-top">
+                      <SelectionCheckbox
+                        label={`Select post ${p.text.slice(0, 30)}`}
                         checked={selected.includes(p.id)}
-                        onChange={(e) =>
-                          setSelected((s) => (e.target.checked ? [...s, p.id] : s.filter((x) => x !== p.id)))
+                        onChange={(checked) =>
+                          setSelected((s) => (checked ? [...s, p.id] : s.filter((x) => x !== p.id)))
                         }
-                        className="size-4 accent-[var(--primary)]"
                       />
                     </td>
                     <td className="max-w-0 px-3 py-3 align-top">
@@ -326,11 +344,20 @@ export default function QueuePage() {
             {rows.map((p) => (
               <li key={p.id}>
                 <Card className="flex flex-col gap-3">
-                  <div className="flex items-start justify-between gap-2">
+                  <div className="flex items-center justify-between gap-2">
                     <StatusPill status={p.status} />
-                    <span className="font-mono text-[11.5px] text-muted-foreground">
-                      {p.scheduledAt ? fmtDateTime(p.scheduledAt) : "no date"}
-                    </span>
+                    <div className="flex min-w-0 items-center gap-1">
+                      <span className="truncate font-mono text-[11.5px] text-muted-foreground">
+                        {p.scheduledAt ? fmtDateTime(p.scheduledAt) : "no date"}
+                      </span>
+                      <SelectionCheckbox
+                        label={`Select post ${p.text.slice(0, 30)}`}
+                        checked={selected.includes(p.id)}
+                        onChange={(checked) =>
+                          setSelected((s) => (checked ? [...s, p.id] : s.filter((x) => x !== p.id)))
+                        }
+                      />
+                    </div>
                   </div>
                   <p className="line-clamp-3 text-[13.5px] leading-relaxed">{p.text}</p>
                   {p.error && (
