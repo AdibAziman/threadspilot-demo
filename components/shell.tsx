@@ -159,7 +159,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                     href={item.href}
                     aria-current={active ? "page" : undefined}
                     className={cn(
-                      "flex min-h-10 items-center gap-2.5 rounded-lg px-2.5 text-[13.5px] font-semibold transition-colors duration-200",
+                      "flex min-h-11 items-center gap-2.5 rounded-lg px-2.5 text-[13.5px] font-semibold transition-colors duration-200",
                       active
                         ? "bg-[var(--primary)] text-[var(--on-primary)]"
                         : "text-muted-foreground hover:bg-muted hover:text-foreground"
@@ -203,7 +203,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <div className="mx-auto flex w-full max-w-[1600px]">
         {/* desktop sidebar */}
         <aside className="sticky top-0 hidden h-dvh w-60 shrink-0 flex-col border-r border-border bg-card/70 px-3 py-4 lg:flex">
-          <Link href="/app" className="mb-5 flex items-center gap-2 px-1">
+          <Link href="/app" className="mb-5 flex min-h-11 items-center gap-2 px-1">
             <Logo />
           </Link>
           <div className="flex-1 overflow-y-auto scroll-thin pr-1">{nav}</div>
@@ -235,13 +235,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               >
                 <Menu className="size-5" aria-hidden />
               </button>
-              <Link href="/app" className="flex min-w-0 items-center gap-2 lg:hidden">
+              <Link href="/app" className="flex min-h-11 min-w-11 items-center gap-2 rounded-lg lg:hidden">
                 <Logo compact />
               </Link>
 
               <button
                 onClick={() => setPalette(true)}
-                className="hidden min-h-10 flex-1 cursor-pointer items-center gap-2 rounded-lg border border-border bg-card px-3 text-left text-[13px] text-muted-foreground transition-colors duration-200 hover:border-[var(--primary)] sm:flex lg:max-w-md"
+                className="hidden min-h-11 flex-1 cursor-pointer items-center gap-2 rounded-lg border border-border bg-card px-3 text-left text-[13px] text-muted-foreground transition-colors duration-200 hover:border-[var(--primary)] sm:flex lg:max-w-md"
               >
                 <Search className="size-4" aria-hidden />
                 <span className="flex-1">Search or jump to…</span>
@@ -311,14 +311,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                       <Link
                         href="/app/settings"
                         onClick={() => setAccountMenu(false)}
-                        className="flex min-h-9 items-center gap-2 rounded-lg px-2 text-[13px] font-medium hover:bg-muted"
+                        className="flex min-h-11 items-center gap-2 rounded-lg px-2 text-[13px] font-medium hover:bg-muted"
                       >
                         <SettingsIcon className="size-4" aria-hidden /> Settings
                       </Link>
                       <Link
                         href="/app/billing"
                         onClick={() => setAccountMenu(false)}
-                        className="flex min-h-9 items-center gap-2 rounded-lg px-2 text-[13px] font-medium hover:bg-muted"
+                        className="flex min-h-11 items-center gap-2 rounded-lg px-2 text-[13px] font-medium hover:bg-muted"
                       >
                         <CreditCard className="size-4" aria-hidden /> Plan & billing
                       </Link>
@@ -329,7 +329,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                           logout();
                           router.push("/login");
                         }}
-                        className="flex min-h-9 w-full cursor-pointer items-center gap-2 rounded-lg px-2 text-left text-[13px] font-medium text-[var(--destructive)] hover:bg-muted"
+                        className="flex min-h-11 w-full cursor-pointer items-center gap-2 rounded-lg px-2 text-left text-[13px] font-medium text-[var(--destructive)] hover:bg-muted"
                       >
                         <LogOut className="size-4" aria-hidden /> Sign out
                       </button>
@@ -499,7 +499,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                     onMouseEnter={() => setCursor(i)}
                     tabIndex={-1}
                     className={cn(
-                      "flex w-full cursor-pointer items-center gap-3 rounded-lg px-3 py-2.5 text-left text-[13.5px] font-medium transition-colors duration-150 hover:bg-muted",
+                      "flex min-h-11 w-full cursor-pointer items-center gap-3 rounded-lg px-3 py-2.5 text-left text-[13.5px] font-medium transition-colors duration-150 hover:bg-muted",
                       i === cursor && "bg-muted"
                     )}
                   >
