@@ -8,23 +8,49 @@ import { useStore } from "@/lib/store";
 import { fmtDate } from "@/lib/utils";
 
 const RANGES = [
-  { id: "7", label: "7 days" },
+  { id: "4", label: "4 weeks" },
+  { id: "8", label: "8 weeks" },
   { id: "14", label: "14 weeks" },
-  { id: "30", label: "30 days" },
-  { id: "90", label: "90 days" },
 ];
 
 export default function AnalyticsPage() {
   const { analytics, posts, connection, toast } = useStore();
   const [range, setRange] = useState("14");
 
-  const published = useMemo(
-    () =>
-      posts
-        .filter((p) => p.status === "published" && p.metrics)
-        .sort((a, b) => (b.metrics?.views ?? 0) - (a.metrics?.views ?? 0)),
-    [posts]
-  );
+  // The weekly series is the only history this demo has, so the range control
+  // windows it in weeks. Everything below reads from that window instead of the
+  // full series, which is what makes the tabs actually change the page.
+  const totalWeeks = analytics.dayLabels.length;
+  const weeks = Math.min(Math.max(Number(range) || totalWeeks, 2), totalWeeks);
+  const windowStart = totalWeeks - weeks;
+
+  const published = useMemo(() => {
+    const since = Date.now() - weeks * 7 * 86400000;
+    return posts
+      .filter((p) => p.status === "published" && p.metrics)
+      .filter((p) => !p.publishedAt || new Date(p.publishedAt).getTime() >= since)
+      .sort((a, b) => (b.metrics?.views ?? 0) - (a.metrics?.views ?? 0));
+  }, [posts, weeks]);
+
+  const windowMetrics = useMemo(() => {
+    const followers = analytics.followers.slice(windowStart);
+    const labels = analytics.dayLabels.slice(windowStart);
+    const reach = analytics.reach.slice(windowStart);
+    const base = analytics.followers[windowStart - 1] ?? followers[0] ?? 0;
+    const deltas = followers.map((value, i) => ({
+      label: labels[i],
+      delta: value - (i === 0 ? base : followers[i - 1]),
+    }));
+    const best = deltas.reduce((a, b) => (b.delta > a.delta ? b : a), { label: labels[0] ?? "", delta: 0 });
+    return {
+      followers,
+      labels,
+      reach,
+      netNew: (followers[followers.length - 1] ?? 0) - base,
+      best,
+      peakReach: Math.max(...reach),
+    };
+  }, [analytics.followers, analytics.dayLabels, analytics.reach, windowStart]);
 
   const totals = useMemo(() => {
     const likes = published.reduce((a, p) => a + (p.metrics?.likes ?? 0), 0);
@@ -64,7 +90,7 @@ export default function AnalyticsPage() {
         level={1}
         className="[&>div:last-child]:w-full sm:[&>div:last-child]:w-auto"
         title="Analytics"
-        subtitle={`Threads account ${connection.handle} · rolling ${range} days`}
+        subtitle={`Threads account ${connection.handle} · last ${weeks} weeks`}
         right={
           <>
             <Tabs tabs={RANGES} active={range} onChange={setRange} />
@@ -85,23 +111,29 @@ export default function AnalyticsPage() {
       <div className="grid min-w-0 gap-4 lg:grid-cols-2">
         <Card className="min-w-0 flex flex-col gap-3">
           <SectionHeader title="Follower growth" subtitle="Net new per week" />
-          <Sparkline values={analytics.followers} label="Followers" tone="var(--primary)" />
+          <Sparkline values={windowMetrics.followers} label="Followers" tone="var(--primary)" />
           <div className="flex flex-wrap items-center gap-2 text-[12.5px]">
             <Chip tone="success">
               <TrendingUp className="size-3" aria-hidden />
-              +4,060 in 14 weeks
+              {windowMetrics.netNew >= 0 ? "+" : ""}
+              {windowMetrics.netNew.toLocaleString()} in {weeks} weeks
             </Chip>
-            <span className="text-muted-foreground">Best week: W13 (+340)</span>
+            <span className="text-muted-foreground">
+              {`Best week: ${windowMetrics.best.label} (${windowMetrics.best.delta >= 0 ? "+" : ""}${windowMetrics.best.delta.toLocaleString()})`}
+            </span>
           </div>
         </Card>
 
         <Card className="min-w-0 flex flex-col gap-3">
           <SectionHeader title="Reach by week" subtitle="Impressions, published posts" />
           <BarTrend
-            values={analytics.reach}
-            labels={analytics.dayLabels}
-            ariaLabel="Weekly impressions over 14 weeks"
+            values={windowMetrics.reach}
+            labels={windowMetrics.labels}
+            ariaLabel={`Weekly impressions over ${weeks} weeks`}
           />
+          <p className="text-[12.5px] text-muted-foreground">
+            Peak {windowMetrics.peakReach.toLocaleString()} impressions in a single week
+          </p>
         </Card>
       </div>
 
@@ -121,7 +153,7 @@ export default function AnalyticsPage() {
         </Card>
 
         <Card className="flex flex-col gap-3">
-          <SectionHeader title="Best hours" subtitle="Engagement score by hour" />
+          <SectionHeader title="Best hours" subtitle="Engagement score by hour, last 90 days" />
           <Heatmap data={analytics.bestHours} ariaLabel="Engagement score by hour of day" />
         </Card>
 
@@ -160,6 +192,13 @@ export default function AnalyticsPage() {
               </tr>
             </thead>
             <tbody>
+              {published.length === 0 && (
+                <tr>
+                  <td colSpan={6} className="py-6 text-center text-[13px] text-muted-foreground">
+                    No posts published in this window.
+                  </td>
+                </tr>
+              )}
               {published.slice(0, 8).map((p) => (
                 <tr key={p.id} className="border-b border-border last:border-0">
                   <td className="max-w-0 py-3 pr-3">

@@ -80,30 +80,50 @@ export function BarTrend({
         role="img"
         aria-label={`${ariaLabel}. Peak ${Math.max(...values)}`}
       >
-        {values.map((v, i) => (
-          <div key={i} className="group relative flex flex-1 flex-col items-center justify-end">
-            <span
-              className="w-full rounded-t-md transition-[opacity,transform] duration-200 group-hover:opacity-80"
-              style={{
-                height: `${Math.max(6, (v / max) * 100)}%`,
-                background: `color-mix(in srgb, ${tone} ${55 + (v / max) * 45}%, transparent)`,
-              }}
-            />
-            <span className="pointer-events-none absolute -top-6 hidden rounded-md border border-border bg-card px-1.5 py-0.5 text-[11px] font-semibold shadow-[var(--shadow-sm)] group-hover:block">
-              {v.toLocaleString()}
-            </span>
-          </div>
-        ))}
+        {values.map((v, i) => {
+          // The bar was an inline span, so its height (a percentage, against a
+          // column with no definite height) never applied and every bar rendered
+          // 0px tall, leaving the chart with axis labels and nothing above them.
+          const barHeight = Math.max(6, Math.round((v / max) * height));
+          return (
+            <div key={i} className="group relative flex flex-1 items-end justify-center" style={{ height }}>
+              <div className="relative w-full" style={{ height: barHeight }}>
+                <span
+                  className="block w-full rounded-t-md transition-[opacity,transform] duration-200 group-hover:opacity-80"
+                  style={{
+                    height: "100%",
+                    background: `color-mix(in srgb, ${tone} ${55 + (v / max) * 45}%, transparent)`,
+                  }}
+                />
+                <span className="pointer-events-none absolute -top-6 left-1/2 hidden -translate-x-1/2 whitespace-nowrap rounded-md border border-border bg-card px-1.5 py-0.5 text-[11px] font-semibold shadow-[var(--shadow-sm)] group-hover:block">
+                  {v.toLocaleString()}
+                </span>
+              </div>
+            </div>
+          );
+        })}
       </div>
       <div className="mt-1.5 flex gap-1.5">
-        {labels.map((l, i) => (
-          <span
-            key={i}
-            className="flex-1 truncate text-center text-[10px] font-medium text-muted-foreground"
-          >
-            {l}
-          </span>
-        ))}
+        {labels.map((l, i) => {
+          // Below 640px a 14-point row leaves about 18px per label, so a three
+          // character week label painted as a single letter and a dot. Thin every
+          // other label there, keeping both ends of the axis labelled and skipping
+          // the neighbour of the last point so no two visible labels touch.
+          const last = labels.length - 1;
+          const dense = labels.length > 8;
+          const quiet = dense && !((i % 2 === 0 && i !== last - 1) || i === last);
+          return (
+            <span
+              key={i}
+              className={cn(
+                "min-w-0 flex-1 whitespace-nowrap text-center text-[10px] font-medium text-muted-foreground",
+                quiet && "max-sm:invisible"
+              )}
+            >
+              {l}
+            </span>
+          );
+        })}
       </div>
     </div>
   );
