@@ -171,7 +171,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                       <span
                         className={cn(
                           "rounded-full px-1.5 text-[11px] font-bold",
-                          active ? "bg-white/25" : "bg-[var(--primary)] text-[var(--on-primary)]"
+                          active ? "bg-[var(--on-primary)] text-[var(--primary-ink)]" : "bg-[var(--primary)] text-[var(--on-primary)]"
                         )}
                       >
                         {badge}
@@ -403,7 +403,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   aria-current={active ? "page" : undefined}
                   className={cn(
                     "flex min-h-[56px] flex-col items-center justify-center gap-0.5 text-[10.5px] font-semibold transition-colors duration-200",
-                    active ? "text-[var(--primary)]" : "text-muted-foreground"
+                    active ? "text-[var(--primary-ink)]" : "text-muted-foreground"
                   )}
                   style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
                 >
@@ -529,7 +529,7 @@ export function Logo({ compact }: { compact?: boolean }) {
           compact && "hidden min-[360px]:inline"
         )}
       >
-        Threads<span className="text-[var(--primary)]">Pilot</span>
+        Threads<span className="text-[var(--primary-ink)]">Pilot</span>
         {!compact && (
           <span className="ml-1.5 rounded bg-muted px-1 py-0.5 align-middle text-[9px] font-bold uppercase tracking-wide text-muted-foreground">
             demo

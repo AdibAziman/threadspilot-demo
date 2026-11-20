@@ -111,14 +111,14 @@ export function Button({
 }
 
 const STATUS_STYLES: Record<string, string> = {
-  published: "bg-[color-mix(in_srgb,var(--success)_14%,transparent)] text-[var(--success)] border-[color-mix(in_srgb,var(--success)_30%,transparent)]",
-  scheduled: "bg-[color-mix(in_srgb,var(--accent)_14%,transparent)] text-[var(--accent)] border-[color-mix(in_srgb,var(--accent)_30%,transparent)]",
-  queued: "bg-[color-mix(in_srgb,var(--accent)_10%,transparent)] text-[var(--accent)] border-[color-mix(in_srgb,var(--accent)_26%,transparent)]",
-  publishing: "bg-[color-mix(in_srgb,var(--warn)_16%,transparent)] text-[var(--warn)] border-[color-mix(in_srgb,var(--warn)_30%,transparent)]",
+  published: "bg-[color-mix(in_srgb,var(--success)_14%,transparent)] text-[var(--success-ink)] border-[color-mix(in_srgb,var(--success)_30%,transparent)]",
+  scheduled: "bg-[color-mix(in_srgb,var(--accent)_14%,transparent)] text-[var(--accent-ink)] border-[color-mix(in_srgb,var(--accent)_30%,transparent)]",
+  queued: "bg-[color-mix(in_srgb,var(--accent)_10%,transparent)] text-[var(--accent-ink)] border-[color-mix(in_srgb,var(--accent)_26%,transparent)]",
+  publishing: "bg-[color-mix(in_srgb,var(--warn)_16%,transparent)] text-[var(--warn-ink)] border-[color-mix(in_srgb,var(--warn)_30%,transparent)]",
   draft: "bg-muted text-muted-foreground border-border",
-  needs_approval: "bg-[color-mix(in_srgb,var(--primary)_14%,transparent)] text-[var(--primary)] border-[color-mix(in_srgb,var(--primary)_30%,transparent)]",
-  rejected: "bg-[color-mix(in_srgb,var(--destructive)_12%,transparent)] text-[var(--destructive)] border-[color-mix(in_srgb,var(--destructive)_28%,transparent)]",
-  failed: "bg-[color-mix(in_srgb,var(--destructive)_12%,transparent)] text-[var(--destructive)] border-[color-mix(in_srgb,var(--destructive)_28%,transparent)]",
+  needs_approval: "bg-[color-mix(in_srgb,var(--primary)_14%,transparent)] text-[var(--primary-ink)] border-[color-mix(in_srgb,var(--primary)_30%,transparent)]",
+  rejected: "bg-[color-mix(in_srgb,var(--destructive)_12%,transparent)] text-[var(--destructive-ink)] border-[color-mix(in_srgb,var(--destructive)_28%,transparent)]",
+  failed: "bg-[color-mix(in_srgb,var(--destructive)_12%,transparent)] text-[var(--destructive-ink)] border-[color-mix(in_srgb,var(--destructive)_28%,transparent)]",
 };
 
 export function StatusPill({ status, className }: { status: string; className?: string }) {
@@ -144,10 +144,10 @@ export function Chip({
 }) {
   const tones: Record<string, string> = {
     muted: "bg-muted text-muted-foreground border-border",
-    brand: "bg-[color-mix(in_srgb,var(--primary)_12%,transparent)] text-[var(--primary)] border-[color-mix(in_srgb,var(--primary)_28%,transparent)]",
-    accent: "bg-[color-mix(in_srgb,var(--accent)_12%,transparent)] text-[var(--accent)] border-[color-mix(in_srgb,var(--accent)_28%,transparent)]",
-    success: "bg-[color-mix(in_srgb,var(--success)_12%,transparent)] text-[var(--success)] border-[color-mix(in_srgb,var(--success)_28%,transparent)]",
-    warn: "bg-[color-mix(in_srgb,var(--warn)_14%,transparent)] text-[var(--warn)] border-[color-mix(in_srgb,var(--warn)_28%,transparent)]",
+    brand: "bg-[color-mix(in_srgb,var(--primary)_12%,transparent)] text-[var(--primary-ink)] border-[color-mix(in_srgb,var(--primary)_28%,transparent)]",
+    accent: "bg-[color-mix(in_srgb,var(--accent)_12%,transparent)] text-[var(--accent-ink)] border-[color-mix(in_srgb,var(--accent)_28%,transparent)]",
+    success: "bg-[color-mix(in_srgb,var(--success)_12%,transparent)] text-[var(--success-ink)] border-[color-mix(in_srgb,var(--success)_28%,transparent)]",
+    warn: "bg-[color-mix(in_srgb,var(--warn)_14%,transparent)] text-[var(--warn-ink)] border-[color-mix(in_srgb,var(--warn)_28%,transparent)]",
   };
   return <span className={cn("chip", tones[tone], className)}>{children}</span>;
 }
@@ -413,7 +413,7 @@ export function Tabs({
             <span
               className={cn(
                 "rounded-full px-1.5 text-[11px]",
-                active === t.id ? "bg-white/25" : "bg-muted"
+                active === t.id ? "bg-[var(--on-primary)] text-[var(--primary-ink)]" : "bg-muted"
               )}
             >
               {t.count}

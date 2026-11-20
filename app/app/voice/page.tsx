@@ -142,7 +142,7 @@ export default function VoicePage() {
                     );
                   }}
                   aria-label={`Remove ${w} from banned words`}
-                  className="chip min-h-11 cursor-pointer border-[color-mix(in_srgb,var(--destructive)_28%,transparent)] bg-[color-mix(in_srgb,var(--destructive)_10%,transparent)] text-[var(--destructive)]"
+                  className="chip min-h-11 cursor-pointer border-[color-mix(in_srgb,var(--destructive)_28%,transparent)] bg-[color-mix(in_srgb,var(--destructive)_10%,transparent)] text-[var(--destructive-ink)]"
                 >
                   {w}
                   <X className="size-3" aria-hidden />

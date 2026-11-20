@@ -63,7 +63,7 @@ export default function Landing() {
               <Sparkles className="size-4" aria-hidden />
             </span>
             <span className="text-[15px] font-extrabold tracking-tight">
-              Threads<span className="text-[var(--primary)]">Pilot</span>
+              Threads<span className="text-[var(--primary-ink)]">Pilot</span>
             </span>
           </span>
           <nav aria-label="Sections" className="ml-6 hidden items-center gap-5 text-[13px] font-semibold text-muted-foreground md:flex">
@@ -85,14 +85,14 @@ export default function Landing() {
       <section className="mx-auto max-w-6xl px-4 pb-10 pt-12 sm:pt-16">
         <div className="grid gap-10 lg:grid-cols-[1.05fr_1fr] lg:items-center">
           <div className="stagger">
-            <span className="chip border-[color-mix(in_srgb,var(--primary)_28%,transparent)] bg-[color-mix(in_srgb,var(--primary)_12%,transparent)] text-[var(--primary)]">
+            <span className="chip border-[color-mix(in_srgb,var(--primary)_28%,transparent)] bg-[color-mix(in_srgb,var(--primary)_12%,transparent)] text-[var(--primary-ink)]">
               <Zap className="size-3.5" aria-hidden />
               Interactive demo · sample data
             </span>
             <h1 className="mt-4 text-[34px] font-extrabold leading-[1.08] tracking-tight sm:text-[46px]">
               Plan Threads content once.
               <br />
-              Let the queue <span className="font-serif italic text-[var(--primary)]">publish</span> it.
+              Let the queue <span className="font-serif italic text-[var(--primary-ink)]">publish</span> it.
             </h1>
             <p className="mt-4 max-w-xl text-[15.5px] leading-relaxed text-muted-foreground">
               ThreadsPilot is a scheduling workspace for people who post for a living. Fill recurring
@@ -132,7 +132,7 @@ export default function Landing() {
             { k: "1 inbox", l: "for replies, mentions and AI-drafted answers" },
           ].map((s) => (
             <div key={s.k}>
-              <p className="font-serif text-[26px] font-bold italic leading-none text-[var(--primary)]">
+              <p className="font-serif text-[26px] font-bold italic leading-none text-[var(--primary-ink)]">
                 {s.k}
               </p>
               <p className="mt-1.5 text-[12.5px] leading-snug text-muted-foreground">{s.l}</p>
@@ -200,7 +200,7 @@ export default function Landing() {
             <ol className="stagger flex flex-col gap-3">
               {STEPS.map((s) => (
                 <li key={s.n} className="card flex gap-4 p-5">
-                  <span className="font-serif text-[24px] font-bold italic leading-none text-[var(--primary)]">
+                  <span className="font-serif text-[24px] font-bold italic leading-none text-[var(--primary-ink)]">
                     {s.n}
                   </span>
                   <div>
@@ -319,7 +319,7 @@ function ProductMock() {
       <div className="bg-background p-3">
         <div className="mb-2 flex items-center justify-between gap-2">
           <span className="text-[12.5px] font-bold">Queue · next 7 days</span>
-          <span className="chip border-[color-mix(in_srgb,var(--accent)_28%,transparent)] bg-[color-mix(in_srgb,var(--accent)_12%,transparent)] text-[var(--accent)]">
+          <span className="chip border-[color-mix(in_srgb,var(--accent)_28%,transparent)] bg-[color-mix(in_srgb,var(--accent)_12%,transparent)] text-[var(--accent-ink)]">
             auto-publish on
           </span>
         </div>

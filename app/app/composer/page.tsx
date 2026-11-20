@@ -262,7 +262,7 @@ export default function ComposerPage() {
                       <button
                         key={t}
                         onClick={() => setTags((x) => x.filter((y) => y !== t))}
-                        className="chip cursor-pointer border-[color-mix(in_srgb,var(--accent)_28%,transparent)] bg-[color-mix(in_srgb,var(--accent)_12%,transparent)] text-[var(--accent)]"
+                        className="chip cursor-pointer border-[color-mix(in_srgb,var(--accent)_28%,transparent)] bg-[color-mix(in_srgb,var(--accent)_12%,transparent)] text-[var(--accent-ink)]"
                       >
                         #{t}
                         <X className="size-3" aria-hidden />

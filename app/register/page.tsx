@@ -45,7 +45,7 @@ export default function RegisterPage() {
               <Sparkles className="size-4" aria-hidden />
             </span>
             <span className="text-[15px] font-extrabold tracking-tight">
-              Threads<span className="text-[var(--primary)]">Pilot</span>
+              Threads<span className="text-[var(--primary-ink)]">Pilot</span>
             </span>
           </Link>
 
@@ -86,7 +86,7 @@ export default function RegisterPage() {
 
           <p className="mt-5 text-center text-[13px] text-muted-foreground">
             Already have an account?{" "}
-            <Link href="/login" className="font-semibold text-[var(--primary)] hover:underline">
+            <Link href="/login" className="font-semibold text-[var(--primary-ink)] hover:underline">
               Sign in
             </Link>
           </p>

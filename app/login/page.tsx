@@ -37,7 +37,7 @@ export default function LoginPage() {
               <Sparkles className="size-4" aria-hidden />
             </span>
             <span className="text-[15px] font-extrabold tracking-tight">
-              Threads<span className="text-[var(--primary)]">Pilot</span>
+              Threads<span className="text-[var(--primary-ink)]">Pilot</span>
             </span>
           </Link>
 
@@ -83,7 +83,7 @@ export default function LoginPage() {
                     tone: "info",
                   })
                 }
-                className="flex min-h-11 cursor-pointer items-center rounded-lg px-2 font-semibold text-[var(--primary)] transition-colors hover:bg-muted"
+                className="flex min-h-11 cursor-pointer items-center rounded-lg px-2 font-semibold text-[var(--primary-ink)] transition-colors hover:bg-muted"
               >
                 Forgot password?
               </button>
@@ -98,7 +98,7 @@ export default function LoginPage() {
 
           <p className="mt-5 text-center text-[13px] text-muted-foreground">
             No account yet?{" "}
-            <Link href="/register" className="font-semibold text-[var(--primary)] hover:underline">
+            <Link href="/register" className="font-semibold text-[var(--primary-ink)] hover:underline">
               Create one
             </Link>
           </p>
@@ -114,7 +114,7 @@ export default function LoginPage() {
                   await login("demo@threadspilot.app", "demo1234");
                   router.push("/app");
                 }}
-                className="cursor-pointer font-semibold text-[var(--primary)] hover:underline"
+                className="cursor-pointer font-semibold text-[var(--primary-ink)] hover:underline"
               >
                 open the workspace without signing in
               </button>
