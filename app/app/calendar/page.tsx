@@ -9,6 +9,19 @@ import type { Post, Slot } from "@/lib/types";
 
 const CATEGORIES = ["Build log", "Trading", "Client work", "Opinion", "Lesson", "Announcement"];
 
+/** Below `sm` the whole cell is the tap target, so the day number works too. */
+function phoneWidth() {
+  return typeof window !== "undefined" && window.matchMedia("(max-width: 639px)").matches;
+}
+
+/** Same colour language the desktop chips and the Legend already use. */
+function statusDotColor(status: Post["status"]) {
+  if (status === "published") return "var(--success)";
+  if (status === "failed" || status === "rejected") return "var(--destructive)";
+  if (status === "needs_approval") return "var(--warn)";
+  return "var(--accent)";
+}
+
 function startOfMonth(d: Date) {
   return new Date(d.getFullYear(), d.getMonth(), 1);
 }
@@ -28,6 +41,10 @@ export default function CalendarPage() {
   const [slotModal, setSlotModal] = useState(false);
   const [reschedulePost, setReschedulePost] = useState<Post | null>(null);
   const [rescheduleDate, setRescheduleDate] = useState("");
+  // A month cell is about 37px wide on a phone, so the post chip inside it
+  // collapsed to a time plus two characters. Phones now show one dot per post
+  // and open the whole day in a sheet instead.
+  const [dayOpen, setDayOpen] = useState<string | null>(null);
   const [draft, setDraft] = useState({ label: "", time: "18:00", days: [1, 3, 5] as number[], category: CATEGORIES[0] });
 
   const byDay = useMemo(() => {
@@ -89,6 +106,9 @@ export default function CalendarPage() {
   }
 
   const monthLabel = cursor.toLocaleDateString("en-GB", { month: "long", year: "numeric" });
+
+  const sheetDay = dayOpen ? new Date(dayOpen) : null;
+  const sheetPosts = dayOpen ? byDay.get(dayOpen) ?? [] : [];
 
   return (
     <div className="flex flex-col gap-5">
@@ -154,6 +174,9 @@ export default function CalendarPage() {
                       }}
                       onDragLeave={() => setDragOver((x) => (x === key ? null : x))}
                       onDrop={() => onDrop(d)}
+                      onClick={() => {
+                        if (items.length > 0 && phoneWidth()) setDayOpen(key);
+                      }}
                       className={cn(
                         "min-h-[92px] border-b border-r border-border p-1.5 transition-colors duration-150 sm:min-h-[118px]",
                         !isMonth && "bg-muted/40",
@@ -171,12 +194,40 @@ export default function CalendarPage() {
                           {d.getDate()}
                         </span>
                         {items.length > 2 && (
-                          <span className="text-[10px] font-semibold text-muted-foreground">
+                          <span className="hidden text-[10px] font-semibold text-muted-foreground sm:inline">
                             +{items.length - 2}
                           </span>
                         )}
                       </div>
-                      <ul className="flex flex-col gap-1">
+                      {items.length > 0 && (
+                        <button
+                          type="button"
+                          onClick={() => setDayOpen(key)}
+                          aria-label={`Show ${items.length} scheduled ${
+                            items.length === 1 ? "post" : "posts"
+                          } on ${d.toLocaleDateString("en-GB", {
+                            weekday: "short",
+                            day: "numeric",
+                            month: "short",
+                          })}`}
+                          className="-mx-0.5 flex min-h-11 w-full flex-wrap content-start items-center gap-1 rounded-md px-0.5 py-1.5 text-left sm:hidden"
+                        >
+                          {items.slice(0, 3).map((p) => (
+                            <span
+                              key={p.id}
+                              className="size-1.5 rounded-full"
+                              style={{ background: statusDotColor(p.status) }}
+                              aria-hidden
+                            />
+                          ))}
+                          {items.length > 3 && (
+                            <span className="text-[9.5px] font-semibold leading-none text-muted-foreground">
+                              +{items.length - 3}
+                            </span>
+                          )}
+                        </button>
+                      )}
+                      <ul className="hidden flex-col gap-1 sm:flex">
                         {items.slice(0, 2).map((p) => (
                           <li key={p.id}>
                             <button
@@ -385,6 +436,45 @@ export default function CalendarPage() {
           </Card>
         </div>
       </div>
+
+      <Modal
+        open={Boolean(sheetDay)}
+        onClose={() => setDayOpen(null)}
+        title={
+          sheetDay
+            ? sheetDay.toLocaleDateString("en-GB", {
+                weekday: "long",
+                day: "numeric",
+                month: "long",
+              })
+            : "Day"
+        }
+        description={`${sheetPosts.length} post${sheetPosts.length === 1 ? "" : "s"} scheduled`}
+      >
+        <ul className="flex flex-col gap-2">
+          {sheetPosts.map((p) => (
+            <li key={p.id}>
+              <button
+                type="button"
+                onClick={() => {
+                  setDayOpen(null);
+                  openReschedule(p);
+                }}
+                className="flex min-h-11 w-full flex-col gap-1.5 rounded-xl border border-border p-3 text-left transition-colors duration-150 hover:bg-muted/50"
+              >
+                <span className="flex w-full items-center justify-between gap-2">
+                  <span className="font-mono text-[12px] font-bold text-[var(--accent)]">
+                    {fmtTime(p.scheduledAt!)}
+                  </span>
+                  <StatusPill status={p.status} />
+                </span>
+                <span className="line-clamp-2 text-[13px] leading-relaxed">{p.text}</span>
+                <span className="text-[11.5px] text-muted-foreground">Tap to reschedule</span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      </Modal>
 
       <Modal
         open={Boolean(reschedulePost)}
