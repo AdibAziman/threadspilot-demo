@@ -38,6 +38,9 @@ export type InboxItem = {
   unread: boolean;
   replied: boolean;
   aiDraft: string;
+  /** The text the user actually sent, so a replied thread can show it. */
+  sentReply?: string | null;
+  repliedAt?: string | null;
   postRef: string;
 };
 

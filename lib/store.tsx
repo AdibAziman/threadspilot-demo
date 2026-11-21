@@ -98,7 +98,7 @@ type Ctx = State & {
   queueFromPool: (id: string) => void;
   refreshInbox: (id: string, draft: string) => void;
   markInboxRead: (id: string) => void;
-  sendInboxReply: (id: string) => void;
+  sendInboxReply: (id: string, text: string) => void;
   markAllInboxRead: () => void;
   toggleRule: (id: string) => void;
   addRule: (rule: Omit<AutomationRule, "id" | "usedToday">) => void;
@@ -417,10 +417,25 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
           ...s,
           inbox: s.inbox.map((i) => (i.id === id ? { ...i, unread: false } : i)),
         })),
-      sendInboxReply: (id) => {
+      sendInboxReply: (id, text) => {
+        const body = text.trim();
         patch((s) => ({
           ...s,
-          inbox: s.inbox.map((i) => (i.id === id ? { ...i, replied: true, unread: false } : i)),
+          inbox: s.inbox.map((i) =>
+            i.id === id
+              ? {
+                  ...i,
+                  replied: true,
+                  unread: false,
+                  sentReply: body,
+                  repliedAt: new Date().toISOString(),
+                }
+              : i
+          ),
+          connection: {
+            ...s.connection,
+            replyQuotaUsed: Math.min(s.connection.replyQuotaUsed + 1, s.connection.replyQuotaTotal),
+          },
         }));
         logActivity("You", "replied", "inbox");
         toast({ title: "Reply sent", body: "Posted as a threaded reply.", tone: "ok" });

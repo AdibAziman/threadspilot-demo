@@ -34,7 +34,8 @@ export default function InboxPage() {
   const { inbox, refreshInbox, markInboxRead, sendInboxReply, markAllInboxRead, toast } = useStore();
   const [filter, setFilter] = useState("all");
   const [activeId, setActiveId] = useState(inbox[0]?.id ?? null);
-  const [draft, setDraft] = useState<string | null>(null);
+  /** The edited reply, tagged with the conversation it was typed into. */
+  const [draft, setDraft] = useState<{ id: string; text: string } | null>(null);
   const [regenerating, setRegenerating] = useState(false);
 
   const rows = useMemo(() => {
@@ -45,7 +46,7 @@ export default function InboxPage() {
   }, [inbox, filter]);
 
   const active = inbox.find((i) => i.id === activeId) ?? rows[0] ?? null;
-  const replyDraft = draft ?? active?.aiDraft ?? "";
+  const replyDraft = draft && draft.id === active?.id ? draft.text : active?.aiDraft ?? "";
   const unread = inbox.filter((i) => i.unread).length;
 
   async function regenerate() {
@@ -59,7 +60,7 @@ export default function InboxPage() {
     ];
     const nextDraft = variants[Math.floor(Math.random() * variants.length)];
     refreshInbox(active.id, nextDraft);
-    setDraft(nextDraft);
+    setDraft({ id: active.id, text: nextDraft });
     setRegenerating(false);
     toast({ title: "New suggestion drafted", tone: "info" });
   }
@@ -112,7 +113,7 @@ export default function InboxPage() {
                 key={item.id}
                 onClick={() => {
                   setActiveId(item.id);
-                  setDraft(item.aiDraft);
+                  setDraft({ id: item.id, text: item.aiDraft });
                   markInboxRead(item.id);
                 }}
                 aria-current={isActive ? "true" : undefined}
@@ -165,6 +166,21 @@ export default function InboxPage() {
                 {active.text}
               </p>
 
+              {active.sentReply && (
+                <div className="flex flex-col gap-1.5 rounded-xl border border-[color-mix(in_srgb,var(--primary)_28%,transparent)] bg-[color-mix(in_srgb,var(--primary)_7%,transparent)] p-3.5">
+                  <p className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wide text-[var(--primary-ink)]">
+                    <CornerDownLeft className="size-3" aria-hidden />
+                    Your reply
+                    {active.repliedAt && (
+                      <span className="font-medium normal-case tracking-normal text-muted-foreground">
+                        · {relTime(active.repliedAt)}
+                      </span>
+                    )}
+                  </p>
+                  <p className="whitespace-pre-wrap text-[13.5px] leading-relaxed">{active.sentReply}</p>
+                </div>
+              )}
+
               <p className="text-[12px] text-muted-foreground">
                 Replying to your post · <span className="font-medium">{active.postRef}</span>
               </p>
@@ -200,7 +216,7 @@ export default function InboxPage() {
                 id="reply-draft"
                 className="textarea min-h-[110px]"
                 value={replyDraft}
-                onChange={(e) => setDraft(e.target.value)}
+                onChange={(e) => setDraft({ id: active.id, text: e.target.value })}
                 placeholder="Write your reply…"
               />
 
@@ -218,10 +234,7 @@ export default function InboxPage() {
                   variant="brand"
                   icon={<Send className="size-4" aria-hidden />}
                   disabled={!replyDraft.trim()}
-                  onClick={() => {
-                    sendInboxReply(active.id);
-                    setDraft("");
-                  }}
+                  onClick={() => sendInboxReply(active.id, replyDraft.trim())}
                 >
                   Send reply
                 </Button>

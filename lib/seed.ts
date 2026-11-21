@@ -216,6 +216,9 @@ export const INBOX: InboxItem[] = [
     replied: true,
     aiDraft:
       "No. Draft, review, approve, then automate the rest. The automation is the schedule, not the judgement.",
+    sentReply:
+      "No. Draft, review, approve, then automate the rest. The automation is the schedule, not the judgement.",
+    repliedAt: new Date(Date.now() - hours(7)).toISOString(),
     postRef: "AI drafts should never publish themselves",
   },
   {
