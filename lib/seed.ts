@@ -30,6 +30,8 @@ export const DEMO_USER: User = {
   workspace: "Kuching Growth Studio",
   plan: "Growth",
   avatarHue: 344,
+  handle: "@adib.builds",
+  bio: "Builder. XAUUSD trader. Writing about systems that ship.",
 };
 
 export const CONNECTION: Connection = {

@@ -142,6 +142,10 @@ export type User = {
   workspace: string;
   plan: "Starter" | "Growth" | "Scale";
   avatarHue: number;
+  /** Public @handle from the settings profile form. */
+  handle?: string;
+  /** One-line bio from the settings profile form. Optional: older payloads predate it. */
+  bio?: string;
 };
 
 export type Analytics = {

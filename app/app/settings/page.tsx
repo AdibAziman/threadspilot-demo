@@ -16,16 +16,59 @@ const ZONES = [
   "America/New_York",
 ];
 
+/**
+ * Fallbacks for a payload written before the profile was persisted: the same
+ * handle and bio this form used to hardcode, so an old browser keeps rendering
+ * exactly what it rendered before.
+ */
+const DEFAULT_HANDLE = "@adib.builds";
+const DEFAULT_BIO = "Builder. XAUUSD trader. Writing about systems that ship.";
+
 export default function SettingsPage() {
-  const { user, settings, updateSettings, setTheme, resetDemo, toast } = useStore();
+  const { user, settings, updateSettings, setTheme, resetDemo, updateUser, toast } = useStore();
   const [tab, setTab] = useState("profile");
   const [profile, setProfile] = useState({
     name: user?.name ?? "",
     email: user?.email ?? "",
     workspace: user?.workspace ?? "",
-    handle: "@adib.builds",
-    bio: "Builder. XAUUSD trader. Writing about systems that ship.",
+    handle: user?.handle ?? DEFAULT_HANDLE,
+    bio: user?.bio ?? DEFAULT_BIO,
   });
+
+  /**
+   * Both save buttons below only raised a toast: the form was local state, so
+   * the new name, email, handle, bio and workspace name were thrown away and
+   * the next reload showed the old ones again while the screen promised that
+   * "changes stay in your browser". Saving now writes to the store, which the
+   * account menu, the dashboard greeting and every post author read.
+   */
+  function saveProfile() {
+    const name = profile.name.trim();
+    const email = profile.email.trim();
+    const handle = profile.handle.trim();
+    if (!name || !email.includes("@")) {
+      toast({
+        title: "Name and email required",
+        body: "The address is where invite links and failure alerts land.",
+        tone: "warn",
+      });
+      return;
+    }
+    updateUser({ name, email, handle, bio: profile.bio });
+    setProfile({ ...profile, name, email, handle });
+    toast({ title: "Profile saved", body: "Used across your posts and invites.", tone: "ok" });
+  }
+
+  function saveWorkspace() {
+    const workspace = profile.workspace.trim();
+    if (!workspace) {
+      toast({ title: "Workspace name required", tone: "warn" });
+      return;
+    }
+    updateUser({ workspace });
+    setProfile({ ...profile, workspace });
+    toast({ title: "Workspace saved", body: workspace, tone: "ok" });
+  }
 
   return (
     <div className="flex flex-col gap-5">
@@ -64,7 +107,7 @@ export default function SettingsPage() {
             <Field label="Bio">
               <textarea className="textarea min-h-[80px]" value={profile.bio} onChange={(e) => setProfile({ ...profile, bio: e.target.value })} />
             </Field>
-            <Button variant="brand" onClick={() => toast({ title: "Profile saved", tone: "ok" })}>
+            <Button variant="brand" onClick={saveProfile}>
               Save profile
             </Button>
           </Card>
@@ -124,7 +167,7 @@ export default function SettingsPage() {
                 <option>Sunday</option>
               </select>
             </Field>
-            <Button variant="brand" onClick={() => toast({ title: "Workspace saved", tone: "ok" })}>
+            <Button variant="brand" onClick={saveWorkspace}>
               Save workspace
             </Button>
           </Card>

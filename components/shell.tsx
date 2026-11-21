@@ -305,7 +305,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                     >
                       <div className="px-2 py-1.5">
                         <p className="text-[13px] font-semibold">{user?.workspace}</p>
-                        <p className="text-[11px] text-muted-foreground">{user?.email}</p>
+                        <p className="truncate text-[11px] text-muted-foreground">
+                          {[user?.handle, user?.email].filter(Boolean).join(" · ")}
+                        </p>
                       </div>
                       <hr className="my-1.5 border-border" />
                       <Link

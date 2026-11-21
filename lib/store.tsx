@@ -82,6 +82,7 @@ type Ctx = State & {
   login: (email: string, password: string) => Promise<boolean>;
   register: (name: string, email: string, password: string, workspace: string) => Promise<boolean>;
   logout: () => void;
+  updateUser: (next: Partial<User>) => void;
   resetDemo: () => void;
   savePost: (post: Post) => void;
   deletePost: (id: string) => void;
@@ -295,6 +296,14 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         return true;
       },
       logout: () => patch((s) => ({ ...s, user: null })),
+      /**
+       * The settings profile and workspace forms used to edit local state and
+       * toast "saved", so a renamed profile or workspace was gone on reload.
+       * This is the write they were missing: the shell, the dashboard greeting
+       * and every post author read `user`, so one call updates all of them.
+       */
+      updateUser: (next) =>
+        patch((s) => (s.user ? { ...s, user: { ...s.user, ...next } } : s)),
       resetDemo: () => {
         setState(initialState());
         toast({ title: "Demo data reset", tone: "info" });
