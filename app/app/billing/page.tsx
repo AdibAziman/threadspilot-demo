@@ -6,17 +6,28 @@ import { Button, Card, Chip, Progress, SectionHeader, Tabs } from "@/components/
 import { useStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
 
-const PLANS = [
+type PlanLimits = { posts: number | null; accounts: number | null; seats: number | null };
+
+type Plan = { name: string; price: number; blurb: string; limits: PlanLimits; perks: string[] };
+
+/**
+ * The numbers a plan allows live beside the perks that quote them, so the usage
+ * meters below and the plan card cannot drift apart. Null means the plan puts no
+ * ceiling on that figure, and the meter prints that instead of inventing one.
+ */
+const PLANS: Plan[] = [
   {
     name: "Starter",
     price: 49,
     blurb: "One account, honest limits",
+    limits: { posts: 100, accounts: 1, seats: 0 },
     perks: ["1 Threads account", "100 scheduled posts / month", "Slots and calendar", "Reply inbox", "7 day analytics"],
   },
   {
     name: "Growth",
     price: 99,
     blurb: "For creators running a real cadence",
+    limits: { posts: null, accounts: 3, seats: 2 },
     perks: [
       "3 Threads accounts",
       "Unlimited queue",
@@ -30,6 +41,7 @@ const PLANS = [
     name: "Scale",
     price: 249,
     blurb: "Agencies and client work",
+    limits: { posts: null, accounts: 10, seats: null },
     perks: [
       "10 accounts, per-client workspaces",
       "Approval chains and audit log",
@@ -40,19 +52,56 @@ const PLANS = [
   },
 ];
 
-const INVOICES = [
-  { id: "INV-2026-09", date: "01 Sep 2026", amount: "RM 99.00", status: "Paid" },
-  { id: "INV-2026-08", date: "01 Aug 2026", amount: "RM 99.00", status: "Paid" },
-  { id: "INV-2026-07", date: "01 Jul 2026", amount: "RM 99.00", status: "Paid" },
-  { id: "INV-2026-06", date: "01 Jun 2026", amount: "RM 49.00", status: "Paid" },
-];
+const fmtBillingDate = (d: Date) =>
+  d.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+
+const fmtInvoiceDate = (d: Date) =>
+  d.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+
+/** First day of the month that is `offset` months from today. */
+function monthStart(offset: number) {
+  const now = new Date();
+  return new Date(now.getFullYear(), now.getMonth() + offset, 1);
+}
 
 export default function BillingPage() {
-  const { user, connection, posts, toast } = useStore();
+  const { user, connection, posts, team, toast } = useStore();
   const [cycle, setCycle] = useState("monthly");
   const current = user?.plan ?? "Growth";
+  const plan = PLANS.find((p) => p.name === current) ?? PLANS[1];
 
-  const used = posts.length;
+  /**
+   * Everything on the plan card used to be a literal: 24 / 1000 posts under a
+   * plan whose own perks say "Unlimited queue", 3 / 5 seats against "2 teammate
+   * seats", a renewal date of 1 October 2026 read in November, and an invoice
+   * history that stopped in September. The usage counts now come from the
+   * workspace, the caps from the plan, and the cycle from the clock.
+   */
+  const cycleStart = monthStart(0);
+  const cycleEnd = monthStart(1);
+  const postsThisCycle = posts.filter((p) => {
+    const when = p.scheduledAt ? new Date(p.scheduledAt) : null;
+    return when !== null && when >= cycleStart && when < cycleEnd;
+  }).length;
+  const meterRows = [
+    { l: "Posts this cycle", used: postsThisCycle, cap: plan.limits.posts },
+    { l: "Accounts connected", used: connection.connected ? 1 : 0, cap: plan.limits.accounts },
+    {
+      l: "Seats used",
+      used: team.filter((m) => m.status === "active" && m.role !== "Owner").length,
+      cap: plan.limits.seats,
+    },
+  ];
+  const invoices = [0, 1, 2, 3].map((back) => {
+    const d = monthStart(-back);
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    return {
+      id: `INV-${d.getFullYear()}-${month}`,
+      date: fmtInvoiceDate(d),
+      amount: `RM ${plan.price.toFixed(2)}`,
+      status: "Paid",
+    };
+  });
 
   return (
     <div className="flex flex-col gap-5">
@@ -65,22 +114,33 @@ export default function BillingPage() {
 
       <div className="grid gap-4 lg:grid-cols-[1.3fr_1fr]">
         <Card className="flex flex-col gap-4">
-          <SectionHeader title={`${current} plan`} subtitle="RM 99 per month, renews 1 October 2026" />
+          <SectionHeader
+            title={`${plan.name} plan`}
+            subtitle={`RM ${plan.price} per month, renews ${fmtBillingDate(cycleEnd)}`}
+          />
           <div className="grid gap-3 sm:grid-cols-3">
-            {[
-              { l: "Posts this cycle", v: `${used}`, m: 1000 },
-              { l: "Accounts connected", v: "1", m: 3 },
-              { l: "Seats used", v: "3", m: 5 },
-            ].map((k) => (
+            {meterRows.map((k) => (
               <div key={k.l} className="rounded-xl border border-border p-3">
                 <p className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
                   {k.l}
                 </p>
                 <p className="mt-1 text-[19px] font-bold">
-                  {k.v}
-                  <span className="text-[12px] font-medium text-muted-foreground"> / {k.m}</span>
+                  {k.used}
+                  {k.cap !== null && (
+                    <span className="text-[12px] font-medium text-muted-foreground"> / {k.cap}</span>
+                  )}
                 </p>
-                <Progress value={Number(k.v)} max={k.m} label={k.l} className="mt-2" />
+                {k.cap === null ? (
+                  <p className="mt-1 text-[11px] font-medium text-muted-foreground">No monthly cap</p>
+                ) : (
+                  <Progress
+                    value={k.used}
+                    max={Math.max(1, k.cap)}
+                    label={`${k.l} on the ${plan.name} plan`}
+                    tone={k.used > k.cap ? "warn" : "brand"}
+                    className="mt-2"
+                  />
+                )}
               </div>
             ))}
           </div>
@@ -135,7 +195,7 @@ export default function BillingPage() {
           </div>
           <SectionHeader title="Invoices" />
           <ul className="flex flex-col gap-2">
-            {INVOICES.map((inv) => (
+            {invoices.map((inv) => (
               <li key={inv.id} className="flex items-center gap-3 rounded-xl border border-border p-3">
                 <div className="min-w-0 flex-1">
                   <p className="text-[12.5px] font-semibold">{inv.id}</p>
