@@ -1,9 +1,10 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { Check, Loader2, Plus, Sparkles, Trash2, Wand2, X } from "lucide-react";
+import { Check, Loader2, Plus, Sparkles, Trash2, TriangleAlert, Wand2, X } from "lucide-react";
 import { Button, Card, Chip, Field, SectionHeader } from "@/components/ui";
 import { useStore } from "@/lib/store";
+import { charBudget } from "@/lib/utils";
 
 const TONE_HINTS: Record<string, { low: string; high: string }> = {
   Direct: { low: "Softened, hedged", high: "Blunt, no preamble" },
@@ -27,6 +28,20 @@ export default function VoicePage() {
     setBusy(false);
     setTest(out[0]);
   }
+
+  /**
+   * The three chips under a test draft were literals: "no banned words",
+   * "under 500 characters" and "tone match 91%" were printed whatever came
+   * back, so a draft carrying a banned word the user had just added still got
+   * a green pass, and the percentage described nothing that was computed.
+   * The checks are measured now - the banned list is scanned case-insensitively
+   * and the length is the same byte count the composer enforces before send -
+   * and the invented score is gone.
+   */
+  const testChars = test ? charBudget(test) : null;
+  const testBanned = test
+    ? voice.bannedWords.filter((w) => w.trim() && test.toLowerCase().includes(w.trim().toLowerCase()))
+    : [];
 
   return (
     <div className="flex flex-col gap-5">
@@ -222,16 +237,33 @@ export default function VoicePage() {
               <div className="rounded-xl border border-[color-mix(in_srgb,var(--primary)_30%,transparent)] bg-[color-mix(in_srgb,var(--primary)_6%,transparent)] p-4">
                 <p className="whitespace-pre-wrap text-[13.5px] leading-relaxed">{test}</p>
                 <ul className="mt-3 flex flex-wrap gap-1.5">
-                  <Chip tone="success">
-                    <Check className="size-3" aria-hidden />
-                    no banned words
-                  </Chip>
-                  <Chip tone="success">
-                    <Check className="size-3" aria-hidden />
-                    under 500 characters
-                  </Chip>
-                  <Chip tone="accent">tone match 91%</Chip>
+                  {testBanned.length === 0 ? (
+                    <Chip tone="success">
+                      <Check className="size-3" aria-hidden />
+                      no banned words
+                    </Chip>
+                  ) : (
+                    <Chip tone="warn">
+                      <TriangleAlert className="size-3" aria-hidden />
+                      {testBanned.length} banned word{testBanned.length > 1 ? "s" : ""}
+                    </Chip>
+                  )}
+                  {testChars && (
+                    <Chip tone={testChars.over ? "warn" : "success"}>
+                      {testChars.over ? (
+                        <TriangleAlert className="size-3" aria-hidden />
+                      ) : (
+                        <Check className="size-3" aria-hidden />
+                      )}
+                      {testChars.used} / {testChars.limit} characters
+                    </Chip>
+                  )}
                 </ul>
+                {testBanned.length > 0 && (
+                  <p className="mt-2 text-[12px] text-muted-foreground">
+                    On your banned list: {testBanned.join(", ")}
+                  </p>
+                )}
               </div>
             ) : (
               <p className="flex items-center gap-2 rounded-xl bg-muted p-3 text-[12.5px] text-muted-foreground">

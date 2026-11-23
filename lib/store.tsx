@@ -526,7 +526,36 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         ];
         const out: string[] = [];
         for (let i = 0; i < count; i++) out.push(pool[Math.floor(r() * pool.length)]);
-        return out;
+        /**
+         * Nothing here used to read the banned list: the draw above ignored
+         * it, so a draft carrying a word the user had just banned came back as
+         * if the guardrail had passed, and the voice screen stamped it "no
+         * banned words". A blocked pick is now swapped for one that passes.
+         * The draw itself is untouched, so a profile with no matching word
+         * gets exactly the drafts it got before. If every candidate is blocked
+         * there is nothing clean to swap in, so the picks are returned as drawn
+         * and the voice screen names what tripped the list instead of hiding it.
+         */
+        const banned = state.voice.bannedWords.map((w) => w.trim().toLowerCase()).filter(Boolean);
+        const blocked = (text: string) => banned.some((w) => text.toLowerCase().includes(w));
+        const passing = pool.filter((t) => !blocked(t));
+        if (passing.length === 0) return out;
+        // Take a passing candidate the list does not already hold, so one
+        // banned draw cannot collapse three drafts into duplicates.
+        const held = new Set(out.filter((t) => !blocked(t)));
+        let next = 0;
+        return out.map((t) => {
+          if (!blocked(t)) return t;
+          for (let i = 0; i < passing.length; i++) {
+            const candidate = passing[(next + i) % passing.length];
+            if (!held.has(candidate)) {
+              held.add(candidate);
+              next = (next + i + 1) % passing.length;
+              return candidate;
+            }
+          }
+          return passing[next++ % passing.length];
+        });
       },
     }),
     [state, ready, toasts, toast, dismissToast, patch, logActivity, publishPost]
