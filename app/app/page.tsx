@@ -23,6 +23,35 @@ import { PostRow, QuotaBar } from "@/components/post-preview";
 import { useStore } from "@/lib/store";
 import { countdown, DAY_LABELS, fmtDateTime, relTime } from "@/lib/utils";
 
+const KPI_WINDOW_MS = 30 * 86400000;
+
+/** One decimal for +3.1, none for -100, so a whole number never reads -100.0. */
+function trimNumber(n: number) {
+  return Number.isInteger(n) ? String(n) : n.toFixed(1);
+}
+
+/**
+ * The move between two counts, as a percentage.
+ *
+ * Returns undefined when there is no prior count to measure against, and when
+ * the change rounds away to nothing. A chip is a claim that something moved,
+ * so a tile with no base and a flat tile both print none instead of inventing
+ * one.
+ */
+function pctDelta(current: number, previous: number) {
+  if (previous <= 0) return undefined;
+  const rounded = Math.round(((current - previous) / previous) * 1000) / 10;
+  if (rounded === 0) return undefined;
+  return `${rounded > 0 ? "+" : ""}${trimNumber(rounded)}%`;
+}
+
+/** The move between two rates, in percentage points. */
+function ptDelta(current: number, previous: number) {
+  const rounded = Math.round((current - previous) * 10) / 10;
+  if (rounded === 0) return undefined;
+  return `${rounded > 0 ? "+" : ""}${trimNumber(rounded)}pt`;
+}
+
 export default function DashboardPage() {
   const { posts, slots, activity, analytics, connection, user, inbox } = useStore();
 
@@ -36,7 +65,19 @@ export default function DashboardPage() {
       0
     );
     const views = published.reduce((a, p) => a + (p.metrics?.views ?? 0), 0);
-    return { published, scheduled, failed, approvals, engagement, views };
+
+    // The tile is labelled "30d", so it counts 30 days. Both windows are read
+    // off publishedAt, which every path that sets status "published" writes.
+    const now = Date.now();
+    const within = (from: number, to: number) =>
+      published.filter((p) => {
+        const at = p.publishedAt ? new Date(p.publishedAt).getTime() : NaN;
+        return at > from && at <= to;
+      });
+    const published30 = within(now - KPI_WINDOW_MS, now);
+    const publishedPrev30 = within(now - 2 * KPI_WINDOW_MS, now - KPI_WINDOW_MS);
+
+    return { published, published30, publishedPrev30, scheduled, failed, approvals, engagement, views };
   }, [posts]);
 
   const upcoming = useMemo(
@@ -50,6 +91,15 @@ export default function DashboardPage() {
   const hour = new Date().getHours();
   const greeting = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
   const unread = inbox.filter((i) => i.unread).length;
+
+  // The 14-week series is the only history these two tiles have: its last
+  // sample is this week and the one before it is last week, so the chips
+  // compare consecutive samples rather than carrying a printed number.
+  const followersNow = connection.followers;
+  const followersPrev = analytics.followers.length > 1 ? analytics.followers[analytics.followers.length - 2] : 0;
+  const engagementNow = analytics.engagementRate[analytics.engagementRate.length - 1] ?? 0;
+  const engagementPrev =
+    analytics.engagementRate.length > 1 ? analytics.engagementRate[analytics.engagementRate.length - 2] : 0;
 
   return (
     <div className="flex flex-col gap-5">
@@ -102,9 +152,13 @@ export default function DashboardPage() {
       <div className="stagger grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <Kpi
           label="Published (30d)"
-          value={String(stats.published.length)}
-          delta="+18%"
-          hint={`${stats.published.length} posts last month`}
+          value={String(stats.published30.length)}
+          delta={pctDelta(stats.published30.length, stats.publishedPrev30.length)}
+          hint={
+            stats.publishedPrev30.length === 0
+              ? "No posts in the prior 30 days"
+              : `${stats.publishedPrev30.length} in the prior 30 days`
+          }
           icon={<CheckCircle2 className="size-4" aria-hidden />}
         />
         <Kpi
@@ -115,16 +169,20 @@ export default function DashboardPage() {
         />
         <Kpi
           label="Followers"
-          value={connection.followers.toLocaleString()}
-          delta="+2.9%"
-          hint="Rolling 14 weeks"
+          value={followersNow.toLocaleString()}
+          delta={pctDelta(followersNow, followersPrev)}
+          hint={followersPrev ? `vs ${followersPrev.toLocaleString()} last week` : "Rolling 14 weeks"}
           icon={<Users className="size-4" aria-hidden />}
         />
         <Kpi
           label="Engagement rate"
-          value={`${analytics.engagementRate[analytics.engagementRate.length - 1]}%`}
-          delta="+0.3pt"
-          hint={`${stats.engagement.toLocaleString()} interactions tracked`}
+          value={`${engagementNow}%`}
+          delta={ptDelta(engagementNow, engagementPrev)}
+          hint={
+            engagementPrev
+              ? `vs ${engagementPrev}% last week`
+              : `${stats.engagement.toLocaleString()} interactions tracked`
+          }
           icon={<TrendingUp className="size-4" aria-hidden />}
         />
       </div>
